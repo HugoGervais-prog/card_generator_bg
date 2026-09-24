@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card and Grid Layout</title>
+    <link rel="stylesheet" href="css/card_style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="card-section">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Dudunsparce</h2>
+                </div>
+                
+                <div class="card-cost">2</div>
+                
+                <div class="card-image-wrapper">
+                    <span class="placeholder-text">Main Art Image Placeholder</span>
+                </div>
+                
+                <div class="card-abilities">
+                    <div class="ability-row">
+                        <span class="icon-placeholder"></span>
+                        <p><strong>Rattled :</strong> +1 to Speed when facing bug, ghost or dark pokemon.</p>
+                    </div>
+                    <div class="move-row">
+                        <div class="move-name">
+                            <span class="icon-placeholder"></span> Hyper Drill
+                        </div>
+                        <div class="move-damage">2d6+2</div>
+                    </div>
+                    <div class="move-row">
+                        <div class="move-name">
+                            <span class="icon-placeholder"></span> Earthquake
+                        </div>
+                        <div class="move-damage">1d12+3</div>
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <div class="footer-stat hp-stat">15</div>
+                    <div class="footer-stat id-stat">0982</div>
+                    <div class="footer-stat power-stat">20</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-section">
+            <div class="grid-header">
+                <select class="dropdown-select">
+                    <option>#0982 Dudunsparce</option>
+                </select>
+                <button class="download-btn">Download Image (Make sure zoom is at 100%)</button>
+                <div class="sheet-info">418 / 46.44 sheets</div>
+            </div>
+            
+            <div class="icon-grid">
+                <script>
+                    for(let i=0; i<150; i++) {
+                        document.write('<div class="grid-item" title="Item ' + (i+1) + '"></div>');
+                    }
+                </script>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

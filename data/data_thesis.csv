@@ -1,0 +1,199 @@
+ID,Name,Description,ICON
+1,Entomologist,+3 for each Bug-type Pokémon on your board. Gain an additional +12 if all Pokémon in this zone are Bug-type.,{BUG}
+2,Nyctologist,+4 for each Dark-type Pokémon on your board. Gain an additional +14 if all Pokémon in this zone are Dark-type.,{DRK}
+3,Dracologist,+5 for each Dragon-type Pokémon on your board. Gain an additional +15 if all Pokémon in this zone are Dragon-type.,{DRG}
+4,Fulminologist,+5 for each Electric-type Pokémon on your board. Gain an additional +15 if all Pokémon in this zone are Electric-type.,{ELE}
+5,Agonologist,+5 for each Fighting-type Pokémon on your board. Gain an additional +15 if all Pokémon in this zone are Fighting-type.,{FIG}
+6,Faeologist,+6 for each Fairy-type Pokémon on your board. Gain an additional +16 if all Pokémon in this zone are Fairy-type.,{FAR}
+7,Pyrologist,+4 for each Fire-type Pokémon on your board. Gain an additional +14 if all Pokémon in this zone are Fire-type.,{FIR}
+8,Ornithologist,+3 for each Flying-type Pokémon on your board. Gain an additional +12 if all Pokémon in this zone are Flying-type.,{FLY}
+9,Phasmologist,+6 for each Ghost-type Pokémon on your board. Gain an additional +16 if all Pokémon in this zone are Ghost-type.,{GHO}
+10,Botanist,+2 for each Grass-type Pokémon on your board. Gain an additional +10 if all Pokémon in this zone are Grass-type.,{GRA}
+11,Geologist,+5 for each Ground-type Pokémon on your board. Gain an additional +15 if all Pokémon in this zone are Ground-type.,{GRD}
+12,Cryologist,+6 for each Ice-type Pokémon on your board. Gain an additional +16 if all Pokémon in this zone are Ice-type.,{ICE}
+13,Naturalist,+2 for each Normal-type Pokémon on your board. Gain an additional +10 if all Pokémon in this zone are Normal-type.,{NOR}
+14,Toxicologist,+4 for each Poison-type Pokémon on your board. Gain an additional +14 if all Pokémon in this zone are Poison-type.,{POS}
+15,Parapsychologist,+3 for each Psychic-type Pokémon on your board. Gain an additional +12 if all Pokémon in this zone are Psychic-type.,{PSY}
+16,Petrologist,+5 for each Rock-type Pokémon on your board. Gain an additional +15 if all Pokémon in this zone are Rock-type.,{ROC}
+17,Metallurgist,+5 for each Steel-type Pokémon on your board. Gain an additional +15 if all Pokémon in this zone are Steel-type.,{STE}
+18,Hydrologist,+2 for each Water-type Pokémon on your board. Gain an additional +10 if all Pokémon in this zone are Water-type.,{WAT}
+19,Entomophilia,+1 for each Pokémon resistant to Bug-type moves on your board. Gain an additional +6 if all Pokémon in this zone are resistant.,{BUG}
+20,Nyctophilia,+2 for each Pokémon resistant to Dark-type moves on your board. Gain an additional +7 if all Pokémon in this zone are resistant.,{DRK}
+21,Dracophilia,+2 for each Pokémon resistant to Dragon-type moves on your board. Gain an additional +7 if all Pokémon in this zone are resistant.,{DRG}
+22,Electrophilia,+2 for each Pokémon resistant to Electric-type moves on your board. Gain an additional +7 if all Pokémon in this zone are resistant.,{ELE}
+23,Makhophilia,+2 for each Pokémon resistant to Fighting-type moves on your board. Gain an additional +7 if all Pokémon in this zone are resistant.,{FIG}
+24,Mythophilia,+3 for each Pokémon resistant to Fairy-type moves on your board. Gain an additional +8 if all Pokémon in this zone are resistant.,{FAR}
+25,Pyrophilia,+2 for each Pokémon resistant to Fire-type moves on your board. Gain an additional +7 if all Pokémon in this zone are resistant.,{FIR}
+26,Aviophilia,+2 for each Pokémon resistant to Flying-type moves on your board. Gain an additional +7 if all Pokémon in this zone are resistant.,{FLY}
+27,Phasmophilia,+3 for each Pokémon resistant to Ghost-type moves on your board. Gain an additional +8 if all Pokémon in this zone are resistant.,{GHO}
+28,Botanophilia,+1 for each Pokémon resistant to Grass-type moves on your board. Gain an additional +6 if all Pokémon in this zone are resistant.,{GRA}
+29,Geophilia,+2 for each Pokémon resistant to Ground-type moves on your board. Gain an additional +7 if all Pokémon in this zone are resistant.,{GRD}
+30,Cryophilia,+3 for each Pokémon resistant to Ice-type moves on your board. Gain an additional +8 if all Pokémon in this zone are resistant.,{ICE}
+31,Koinophilia,+1 for each Pokémon resistant to Normal-type moves on your board. Gain an additional +6 if all Pokémon in this zone are resistant.,{NOR}
+32,Toxiphilia,+2 for each Pokémon resistant to Poison-type moves on your board. Gain an additional +7 if all Pokémon in this zone are resistant.,{POS}
+33,Psychophilia,+2 for each Pokémon resistant to Psychic-type moves on your board. Gain an additional +7 if all Pokémon in this zone are resistant.,{PSY}
+34,Lithophilia,+2 for each Pokémon resistant to Rock-type moves on your board. Gain an additional +7 if all Pokémon in this zone are resistant.,{ROC}
+35,Metallophilia,+2 for each Pokémon resistant to Steel-type moves on your board. Gain an additional +7 if all Pokémon in this zone are resistant.,{STE}
+36,Hydrophilia,+1 for each Pokémon resistant to Water-type moves on your board. Gain an additional +6 if all Pokémon in this zone are resistant.,{WAT}
+37,Entomophobia,+2 for each Pokémon weak to Bug-type moves on your board. Gain an additional +7 if all Pokémon in this zone are weak.,{BUG}
+38,Nyctophobia,+2 for each Pokémon weak to Dark-type moves on your board. Gain an additional +7 if all Pokémon in this zone are weak.,{DRK}
+39,Dracophobia,+2 for each Pokémon weak to Dragon-type moves on your board. Gain an additional +7 if all Pokémon in this zone are weak.,{DRG}
+40,Electrophobia,+2 for each Pokémon weak to Electric-type moves on your board. Gain an additional +7 if all Pokémon in this zone are weak.,{ELE}
+41,Makhophobia,+2 for each Pokémon weak to Fighting-type moves on your board. Gain an additional +7 if all Pokémon in this zone are weak.,{FIG}
+42,Mythophobia,+3 for each Pokémon weak to Fairy-type moves on your board. Gain an additional +8 if all Pokémon in this zone are weak.,{FAR}
+43,Pyrophobia,+2 for each Pokémon weak to Fire-type moves on your board. Gain an additional +7 if all Pokémon in this zone are weak.,{FIR}
+44,Aviophobia,+2 for each Pokémon weak to Flying-type moves on your board. Gain an additional +7 if all Pokémon in this zone are weak.,{FLY}
+45,Phasmophobia,+3 for each Pokémon weak to Ghost-type moves on your board. Gain an additional +8 if all Pokémon in this zone are weak.,{GHO}
+46,Botanophobia,+1 for each Pokémon weak to Grass-type moves on your board. Gain an additional +6 if all Pokémon in this zone are weak.,{GRA}
+47,Geophobia,+2 for each Pokémon weak to Ground-type moves on your board. Gain an additional +7 if all Pokémon in this zone are weak.,{GRD}
+48,Cryophobia,+3 for each Pokémon weak to Ice-type moves on your board. Gain an additional +8 if all Pokémon in this zone are weak.,{ICE}
+49,Koinophobia,+4 for each Pokémon weak to Normal-type moves on your board. Gain an additional +12 if all Pokémon in this zone are weak.,{NOR}
+50,Toxiphobia,+2 for each Pokémon weak to Poison-type moves on your board. Gain an additional +7 if all Pokémon in this zone are weak.,{POS}
+51,Psychophobia,+2 for each Pokémon weak to Psychic-type moves on your board. Gain an additional +7 if all Pokémon in this zone are weak.,{PSY}
+52,Lithophobia,+2 for each Pokémon weak to Rock-type moves on your board. Gain an additional +7 if all Pokémon in this zone are weak.,{ROC}
+53,Metallophobia,+2 for each Pokémon weak to Steel-type moves on your board. Gain an additional +7 if all Pokémon in this zone are weak.,{STE}
+54,Hydrophobia,+1 for each Pokémon weak to Water-type moves on your board. Gain an additional +6 if all Pokémon in this zone are weak.,{WAT}
+55,,,
+56,,,
+57,,,
+58,,,
+59,,,
+60,,,
+61,,,
+62,,,
+63,,,
+64,,,
+65,,,
+66,,,
+67,,,
+68,,,
+69,,,
+70,,,
+71,,,
+72,,,
+73,,,
+74,,,
+75,,,
+76,,,
+77,,,
+78,,,
+79,,,
+80,,,
+81,,,
+82,,,
+83,,,
+84,,,
+85,,,
+86,,,
+87,,,
+88,,,
+89,,,
+90,,,
+91,,,
+92,,,
+93,,,
+94,,,
+95,,,
+96,,,
+97,,,
+98,,,
+99,,,
+100,,,
+101,,,
+102,,,
+103,,,
+104,,,
+105,,,
+106,,,
+107,,,
+108,,,
+109,,,
+110,,,
+111,,,
+112,,,
+113,,,
+114,,,
+115,,,
+116,,,
+117,,,
+118,,,
+119,,,
+120,,,
+121,,,
+122,,,
+123,,,
+124,,,
+125,,,
+126,,,
+127,,,
+128,,,
+129,,,
+130,,,
+131,,,
+132,,,
+133,,,
+134,,,
+135,,,
+136,,,
+137,,,
+138,,,
+139,,,
+140,,,
+141,,,
+142,,,
+143,,,
+144,,,
+145,,,
+146,,,
+147,,,
+148,,,
+149,,,
+150,,,
+151,,,
+152,,,
+153,,,
+154,,,
+155,,,
+156,,,
+157,,,
+158,,,
+159,,,
+160,,,
+161,,,
+162,,,
+163,,,
+164,,,
+165,,,
+166,,,
+167,,,
+168,,,
+169,,,
+170,,,
+171,,,
+172,,,
+173,,,
+174,,,
+175,,,
+176,,,
+177,,,
+178,,,
+179,,,
+180,,,
+181,,,
+182,,,
+183,,,
+184,,,
+185,,,
+186,,,
+187,,,
+188,,,
+189,,,
+190,,,
+191,,,
+192,,,
+193,,,
+194,,,
+195,,,
+196,,,
+197,,,
+198,,,

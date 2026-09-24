@@ -1,0 +1,273 @@
+:root {
+  --normal: #A8A77A;
+    --fire: #EE8130;
+	--water: #6390F0;
+	--electric: #F7D02C;
+	--grass: #7AC74C;
+	--ice: #96D9D6;
+	--fighting: #C22E28;
+	--poison: #A33EA1;
+	--ground: #E2BF65;
+	--flying: #A98FF3;
+	--psychic: #F95587;
+	--bug: #A6B91A;
+	--rock: #B6A136;
+	--ghost: #735797;
+	--dragon: #6F35FC;
+	--dark: #3d2e23;
+	--steel: #B7B7CE;
+	--fairy: #D685AD;
+}
+
+body {
+    font-family: Sans-serif;
+    margin: 20px;
+    background-color: #333;
+    font-family: "Cal Sans", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px;
+}
+.card_content{
+    position: relative;
+    width: 810px;
+    height: 1110px;
+    background-image: linear-gradient(
+        to right bottom, 
+        rgba(241, 241, 241, 0.8), 
+        rgba(179, 179, 179, 0.8)) ;
+    background-size: cover;
+    background-position: top;
+    padding: 70px;
+    overflow: hidden;
+}
+.card_name {
+    color: rgb(0, 0, 0);
+    font-size: 92px;
+    margin: 0;
+    z-index: 99;
+    position: absolute;
+    left: 70px;
+    top: 70px;
+    -webkit-text-stroke: 2px rgb(255, 255, 255);
+}
+.stage_name {
+    color: rgb(0, 0, 0);
+    margin: 0;
+    z-index: 99;
+    position: absolute;
+    left: 70px;
+    top: 170px;
+    font-size: 36px;
+}
+.type_corner{
+    background-color: var(--poison);
+    min-width: 30%;
+    min-height: 100%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-image: linear-gradient(
+        to bottom, 
+        var(--grass), 
+        var(--poison)) ;
+    background-size: cover;
+    background-position: top;
+}
+.portrait_box {
+    position: absolute;
+    top: 52%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+}
+
+.card_portrait {
+    width: 810px;
+    height: 550px;
+    object-fit: contain;
+}
+.icon_background{
+    position: absolute;
+    opacity: 0.1;
+    bottom: -150px;
+    right: -150px;
+    width: 70%;
+}
+.type_box{
+    position: absolute;
+    top: 70px;
+    right:70px;
+}
+.berry_box{
+    position: absolute;
+    top: 220px;
+    left:70px;
+    background-color: #858585;
+    border-radius: 200px;
+    padding: 5px;
+    z-index: 999;
+}
+.berry_box_evo {
+    position: absolute;
+    bottom: 70px;
+    right: 60px;
+    background-color: #858585;
+    border-radius: 200px;
+    padding: 5px;
+}
+.berry_box_evoAlt {
+    position: absolute;
+    bottom: 300px;
+    right: 60px;
+    background-color: #858585;
+    border-radius: 200px;
+    padding: 5px;
+}
+.berry img{
+    width: 70px;
+    margin: 5px;
+}
+.berrySmall img{
+    width: 45px;
+}
+.card_evolution {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.portrait_box_evolution{
+    background-color: #555555;
+    border-radius: 200px;
+    padding: 20px;
+    position: absolute;
+    bottom: 105px;
+    right: 70px;
+    width: 140px;
+    height: 140px;
+}
+.card_evolution_2 {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.portrait_box_evolution2 {
+    background-color: #555555;
+    border-radius: 200px;
+    padding: 20px;
+    position: absolute;
+    bottom: 335px;
+    right: 70px;
+    width: 140px;
+    height: 140px;
+}
+.card_evolution_3 {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.portrait_box_evolution3 {
+    background-color: #555555;
+    border-radius: 200px;
+    padding: 20px;
+    position: absolute;
+    bottom: 165px;
+    right: 281px;
+    width: 140px;
+    height: 140px;
+}
+.stats_box{
+    color: rgb(0, 0, 0);
+    margin: 0;
+    z-index: 99;
+    position: absolute;
+    left: 30px;
+    bottom: 70px;
+    font-size: 44px;
+    font-weight: 100;
+    line-height: 0%;
+}
+.text_icons{
+    width: 44px;
+    opacity: 0.4;
+    margin-right: 15px;
+}
+.stats_text{
+    margin-top: 0px;
+    margin-bottom: 25px;
+}
+.habitat {
+    position: absolute;
+    bottom: 350px;
+    right: 70px;
+    z-index: 999;
+    border-radius: 900px;
+    width: 161px;
+    background-color: #858585;
+}
+.score_box{
+    position: absolute;
+    bottom: 47px;
+    right: 70px;
+    font-family: "Cal Sans", sans-serif;
+    font-size: 210px;
+    color: #333;
+}
+.total{
+    color: white;
+    margin-left: 5px;
+    font-size: 22px;
+}
+.button_table {
+    float: left;
+    margin-left: 10px;
+    width: 60%; /*55% for actual size or 64*/
+    position: absolute;
+    left:970px;
+    top: 70px;
+    max-height: 1008px;
+    overflow-y: scroll;
+}
+.pokemon_button {
+    float: left;
+    width: 56px;
+    height: 56px;
+    cursor: pointer;
+}
+.pokemon_button img{
+    float: left;
+    width: 52px;
+    height: 52px;
+    margin-left:-6px;
+}
+.gen1{
+    background-color: hsl(200, 25%, 82%); /* soft blue-gray (Kanto) */
+}
+.gen2{
+    background-color: hsl(35, 25%, 80%); /* soft gold-beige (Johto) */
+}
+.gen3{
+    background-color: hsl(160, 25%, 78%); /* soft teal (Hoenn) */
+}
+.gen4{
+    background-color: hsl(258, 25%, 82%); /* soft slate blue (Sinnoh) */
+}
+.gen5{
+    background-color: hsl(30, 20%, 78%); /* soft warm gray (Unova) */
+}
+.gen6{
+    background-color: hsl(260, 25%, 84%); /* soft purple-gray (Kalos) */
+}
+.gen7{
+    background-color: hsl(45, 30%, 80%); /* soft sand yellow (Alola) */
+}
+.gen8{
+    background-color: hsl(340, 25%, 82%); /* soft rose gray (Galar) */
+}
+.gen9{
+    background-color: hsl(120, 20%, 80%); /* soft green-gray (Paldea) */
+}

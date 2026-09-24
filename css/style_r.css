@@ -1,0 +1,663 @@
+:root {
+  --normal: #A8A77A;
+    --fire: #EE8130;
+	--water: #6390F0;
+	--electric: #F7D02C;
+	--grass: #7AC74C;
+	--ice: #96D9D6;
+	--fighting: #C22E28;
+	--poison: #A33EA1;
+	--ground: #E2BF65;
+	--flying: #A98FF3;
+	--psychic: #F95587;
+	--bug: #A6B91A;
+	--rock: #B6A136;
+	--ghost: #735797;
+	--dragon: #6F35FC;
+	--dark: #3d2e23;
+	--steel: #B7B7CE;
+	--fairy: #D685AD;
+}
+
+/* =========================================
+   1. APP LAYOUT & MODERN STYLING
+   ========================================= */
+body {
+    font-family: "Roboto Condensed", sans-serif;
+    margin: 0;
+    padding: 30px;
+    background-color: #1e1e24; /* Deep dark modern grey */
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+}
+
+.app-container {
+    display: flex;
+    gap: 40px;
+    max-width: 1600px;
+    width: 100%;
+}
+
+/* --- Left Side: Card Preview --- */
+.card-section {
+    flex: 0 0 810px; /* Locks the exact width of the card */
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border-radius: 20px;
+    overflow: hidden;
+    background: #000;
+}
+
+/* --- Right Side: Sidebar Controls --- */
+.sidebar-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    /*max-width: 600px;*/
+}
+
+.control-panel, .roster-panel {
+    background-color: #2b2b36;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    border: 1px solid #3f3f4e;
+}
+
+h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #f5d02f; /* Pokémon Gold */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* --- Form Controls --- */
+.control-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+#menu_pokemon {
+    font-size: 16px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #4a4a5a;
+    background-color: #1e1e24;
+    color: white;
+    width: 60%;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.total {
+    font-size: 14px;
+    color: #a0a0b0;
+    margin: 0;
+}
+
+#download-btn {
+    width: 100%;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 15px;
+    background-color: #e3350d; /* Nintendo Red */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+#download-btn:hover {
+    background-color: #ff471a;
+}
+
+#download-btn:active {
+    transform: scale(0.98);
+}
+
+.help-text {
+    font-size: 12px;
+    color: #888;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 0;
+}
+
+/* --- Roster Grid --- */
+.button_table {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 10px;
+    max-height: 700px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+/* Custom Scrollbar for Roster */
+.button_table::-webkit-scrollbar {
+    width: 8px;
+}
+.button_table::-webkit-scrollbar-track {
+    background: #1e1e24;
+    border-radius: 4px;
+}
+.button_table::-webkit-scrollbar-thumb {
+    background: #4a4a5a;
+    border-radius: 4px;
+}
+.button_table::-webkit-scrollbar-thumb:hover {
+    background: #f5d02f;
+}
+
+.pokemon_button {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, border-color 0.2s;
+    background-color: #3f3f4e; /* Default background if gen class fails */
+}
+
+.pokemon_button:hover {
+    transform: translateY(-3px);
+    border-color: #ffffff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.pokemon_button img {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+}
+
+.gen1 { background-color: hsl(200, 25%, 82%); } /* Kanto */
+.gen2 { background-color: hsl(35, 25%, 80%); } /* Johto */
+.gen3 { background-color: hsl(160, 25%, 78%); } /* Hoenn */
+.gen4 { background-color: hsl(258, 25%, 82%); } /* Sinnoh */
+.gen5 { background-color: hsl(30, 20%, 78%); } /* Unova */
+.gen6 { background-color: hsl(260, 25%, 84%); } /* Kalos */
+.gen7 { background-color: hsl(45, 30%, 80%); } /* Alola */
+.gen8 { background-color: hsl(340, 25%, 82%); } /* Galar */
+.gen9 { background-color: hsl(120, 20%, 80%); } /* Paldea */
+
+/* =========================================
+   2. CARD ABSOLUTE POSITIONING 
+   ========================================= */
+.card_content{
+    width: 810px;
+    height: 1110px;
+    background-image: url("../img/background/normal.jpg");
+    background-repeat: no-repeat;
+    background-position-x: 85px;
+    position: relative;
+}
+.card_name {
+    color: white;
+    position: absolute;
+    top: 5px;
+    left: 70px;
+    font-size: 50px;
+    width: 650px;
+    font-family: "Roboto Condensed", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    font-weight: 500;
+    color: white;
+    text-shadow: 3px 3px black;
+}
+.generic_cost {
+    color: white;
+    position: absolute;
+    top: 20px;
+    left: 594px;
+    font-size: 40px;
+    width: 47px;
+    font-family: "Roboto Condensed", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    font-weight: 600;
+    color: white;
+    text-shadow: 3px 3px black;
+    background-color: #393939;
+    text-align: center;
+    border-radius: 35px;
+}
+.card_portrait {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.portrait_box {
+    position: absolute;
+    top: 150px;
+    left: 47px;
+    height: 710px;
+    width: 717px;
+}
+.portrait_box_evolution {
+    position: absolute;
+    top: 159px;
+    left: 602px;
+    text-align: center;
+    width: 126px;
+    height: 126px;
+}
+.card_evolution {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.card_evolution_bubble {
+    position: absolute;
+    top: 159px;
+    left: 602px;
+    text-align: center;
+    width: 125px;
+    height: 125px;
+    background-color: blue;
+    border-radius: 60px;
+}
+.card_evolution_2 {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.portrait_box_evolution_2 {
+    position: absolute;
+    top: 290px;
+    left: 602px;
+    text-align: center;
+    width: 126px;
+    height: 126px;
+}
+.card_evolution_bubble_2 {
+    position: absolute;
+    top: 290px;
+    left: 602px;
+    text-align: center;
+    width: 125px;
+    height: 125px;
+    background-color: blue;
+    border-radius: 60px;
+}
+.card_evolution_3 {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.portrait_box_evolution_3 {
+    position: absolute;
+    top: 424px;
+    left: 602px;
+    text-align: center;
+    width: 126px;
+    height: 126px;
+}
+.card_evolution_bubble_3 {
+    position: absolute;
+    top: 424px;
+    left: 602px;
+    text-align: center;
+    width: 125px;
+    height: 125px;
+    background-color: blue;
+    border-radius: 60px;
+}
+.card_speed {
+    color: white;
+    position: absolute;
+    top: 64px;
+    left: 91px;
+    font-size: 100px;
+    width: 100px;
+    text-align: center;
+    font-family: "Roboto Condensed", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    font-weight: 900;
+    color: yellow;
+}
+.type_icons{
+    width: 48px;
+}
+.a_box_border {
+    position: absolute;
+    top: 667px;
+    left: 87px;
+    background-color: black;
+    width: 635px;
+    height: 6px;
+    border: #333;
+}
+.a_box {
+    position: absolute;
+    top: 672px;
+    left: 89px;
+    background-color: black;
+    width: 632px;
+    height: 78px;
+    opacity: 65%;
+    border: #333;
+}
+.m1_type {
+    position: absolute;
+    top: 756px;
+    left: 95px;
+}
+.m1_box {
+    position: absolute;
+    top: 750px;
+    left: 89px;
+    background-color: black;
+    width: 632px;
+    height: 62px;
+    opacity: 65%;
+}
+.m2_box {
+    position: absolute;
+    top: 812px;
+    left: 89px;
+    background-color: black;
+    width: 632px;
+    height: 60px;
+    opacity: 65%;
+}
+.m2_type {
+    position: absolute;
+    top: 816px;
+    left: 95px;
+}
+.p1_type {
+    position: absolute;
+    top: 912px;
+    left: 700px;
+}
+.p2_type {
+    position: absolute;
+    top: 912px;
+    left: 647px;
+}
+
+.cost_icon {
+    position: absolute;
+    top: 60px;
+    left: 700px;
+}
+.a_icons {
+    position: absolute;
+    top: 675px;
+    left: 87px;
+    width: 65px;
+}
+.c_icons {
+    position: absolute;
+    top: 913px;
+    left: 65px;
+    width: 45px;
+}
+.ruler_icon {
+    position: absolute;
+    top: 980px;
+    left: 575px;
+    width: 40px;
+}
+.height {
+    color: white;
+    position: absolute;
+    top: 944px;
+    left: 620px;
+    font-size: 36px;
+    text-align: left;
+    width: 120px;
+}
+.weight_icon {
+    position: absolute;
+    top: 980px;
+    left: 395px;
+    width: 36px;
+}
+.weight {
+    color: white;
+    position: absolute;
+    top: 944px;
+    left: 435px;
+    font-size: 36px;
+    text-align: left;
+    width: 130px;
+}
+.ability_text {
+    color: white;
+    position: absolute;
+    top: 700px;
+    left: 49px;
+    font-size: 36px;
+    width: 696px;
+    height: 200px;
+    text-align: left;
+    font-family: "Roboto Condensed", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    padding: 10px;
+}
+.ability_name {
+    color: white;
+    position: absolute;
+    top: 640px;
+    left: 49px;
+    font-size: 42px;
+    width: 695px;
+    height: 193px;
+    text-align: left;
+    font-family: "Roboto Condensed", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    text-shadow: 3px 3px black;
+    background-color: rgb(0 0 0 / 70%);
+    padding: 10px;
+    border-radius: 20px;
+    text-decoration: underline;
+    font-weight: 600;
+}
+.m1_text {
+    color: white;
+    position: absolute;
+    top: 723px;
+    left: 150px;
+    font-size: 36px;
+    width: 569px;
+    height: 60px;
+    text-align: left;
+    font-family: "Roboto Condensed", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+}
+.m2_text {
+    color: white;
+    position: absolute;
+    top: 785px;
+    left: 150px;
+    font-size: 36px;
+    width: 569px;
+    height: 60px;
+    text-align: left;
+    font-family: "Roboto Condensed", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+}
+.damage {
+    float: right;
+    margin-right: 10px;
+    font-weight: bold;
+    color: yellow;
+}
+.capture_rate {
+    color: #ffd700;
+    position: absolute;
+    top: 854px;
+    left: 125px;
+    font-size: 50px;
+    width: 569px;
+    height: 60px;
+    text-align: left;
+    font-family: "Roboto Condensed", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    font-weight: bold;
+    text-shadow: 3px 3px black;
+}
+.index {
+    color: white;
+    position: absolute;
+    top: 935px;
+    left: 60px;
+    font-size: 40px;
+    width: 686px;
+    height: 49px;
+    text-align: left;
+    font-family: "Roboto Condensed", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0px;
+    background-color: rgb(0 0 0 / 70%); 
+    padding-left: 5px;
+}
+.HP {
+    color: white;
+    position: absolute;
+    top: 911px;
+    left: 618px;
+    font-size: 48px;
+    width: 108px;
+    height: 60px;
+    text-align: left;
+    font-family: "Roboto Condensed", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    font-weight: 600;
+    color: black;
+    text-align: center;
+}
+.copyright {
+    color: white;
+    position: absolute;
+    top: 1010px;
+    left: 50px;
+    font-size: 25px;
+    width: 569px;
+    height: 60px;
+    text-align: left;
+    font-family: "Roboto Condensed", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+}
+.gradient_box {
+    position: absolute;
+    top: 908px;
+    left: 51px;
+    background-image: linear-gradient(to left, var(--grass), var(--poison));
+    background-size: cover;
+    width: 710px;
+    height: 60px;
+    opacity: 100%;
+    border-radius: 15px;
+    mix-blend-mode: color
+}
+.gradient_box_2 {
+    position: absolute;
+    top: 55px;
+    left: 51px;
+    background-image: linear-gradient(to left, var(--grass), var(--poison));
+    background-size: cover;
+    width: 710px;
+    height: 60px;
+    opacity: 100%;
+    border-radius: 15px;
+    mix-blend-mode: color
+}
+.move_icons {
+    float: left;
+    width: 64px;
+    margin-top: -10px;
+    margin-left: -15px;
+}
+/* Ensure all inline icons align to the line correctly */
+.move_icons_text {
+    height: 1em; /* Base height */
+    vertical-align: middle; /* Standardize alignment */
+    display: inline-block;
+}
+
+/* Specific styling for the pip to match the reference image */
+.numeric_pip {
+    box-sizing: border-box; /* Crucial for sizing */
+    
+    /* Pip color and circle shape */
+    background-color: #393939; /* The light grey color from the example */
+    border: 1px solid #000;    /* The thin black outline */
+    border-radius: 50%;       /* Makes it a perfect circle */
+    
+    /* 
+       Sizing and positioning. To keep it circular while matching 
+       line-height, we use relative 'em' sizes.
+       A 1em font is roughly a box; adding 0.25em padding on top/bottom 
+       creates the circle container.
+    */
+    height: 1.5em;            /* Slightly taller than 1em text to contain padding */
+    min-width: 1.5em;         /* Ensures it remains a circle if the number is wide (e.g., "10") */
+    margin-top: -0.25em;      /* Nudges it up so it stays on the line */
+    padding: 0 0.1em;         /* Small side padding for wider numbers */
+    
+    /* Number styling (matches the serif style and bold shadow from the example) */
+    color: #FFF;
+    font-family: "Roboto Condensed", sans-serif;
+    font-size: 0.9em;        /* Relative to the pip size, this must be scaled slightly */
+    font-weight: bold;
+    font-stretch: condensed;  /* Narrows the font if supported by the browser/font */
+    
+    /* Text layout within the pip */
+    line-height: 1.5em;      /* Same as height for perfect vertical centering */
+    text-align: center;
+    overflow: visible;       /* Allows the wide shadow to overflow */
+    
+    /* 
+       The key to the look: A deep, offset shadow 
+       to create that heavy '2D cutout' effect.
+       Using text-shadow looks better on the number itself.
+    */
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.7), 2px 2px 0px rgba(0,0,0,0.5);
+    
+    /* Optional: Slight box shadow for the pip itself (very subtle) */
+    box-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+}
+/* Base style for stat modifiers */
+.stat_modifier_yellow,
+.stat_modifier_red {
+    font-weight: bold;
+    /* Black outline to ensure high contrast and readability */
+    text-shadow: 
+        1px  1px 0 #000,
+       -1px -1px 0 #000,
+        1px -1px 0 #000,
+       -1px  1px 0 #000;
+}
+
+/* Yellow styling for positive modifiers (+2, +X) */
+.stat_modifier_yellow {
+    color: #ffd700; /* Bright gold/yellow */
+}
+
+/* Red styling for negative modifiers (-1, -X) */
+.stat_modifier_red {
+    color: #ff4d4d; /* Vivid red */
+}

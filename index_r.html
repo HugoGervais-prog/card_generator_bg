@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon card generator</title>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <link href="css/style_r.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="js/jquery-google-sheet-to-json.js"></script>
+    <script src="js/jquery.csv.js"></script>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <div class="card-section">
+            <div class="card_content" id="capture">
+
+                <div class="portrait_box">
+                    <img class="card_portrait" src="img/sprite/0001 Bulbasaur.png">
+                </div>
+
+
+                <img class="card_frame" src="img/base_frame/B_simple.png" width="810" height="1110">
+                
+
+                <p class="card_name">Bulbasaur</p>
+
+                <p class="generic_cost">2</p>
+
+                <img class="type_icons cost_icon c1" src="img/type/grass.png">
+                <img class="type_icons cost_icon c2" style="left:650px;display:none;" src="img/type/grass.png">
+                <img class="type_icons cost_icon c3" style="left:600px;display:none;" src="img/type/grass.png">
+                <img class="type_icons cost_icon c4" style="left:550px;display:none;" src="img/type/grass.png">
+                <img class="type_icons cost_icon c5" style="left:500px;display:none;" src="img/type/grass.png">
+                <img class="type_icons cost_icon c6" style="left:450px;display:none;" src="img/type/grass.png">
+                
+                
+                <p class="ability_name">Overgrown</p>
+                <p class="ability_text">+1 for each fire pokémon in the same column as this pokémon, but -1 for each water pokémon in the same row.</p>
+
+                <img class="type_icons p1_type" src="img/type/grass.png">
+                <img class="type_icons p2_type" src="img/type/grass.png">
+                
+                <img class="c_icons" src="img/icons/ball.png">
+                <p class="capture_rate">29</p>
+
+                <p class="index">0001</p>
+
+                <img class="ruler_icon" src="img/ruler.png">
+                <p class="height">999.99 m</p>
+
+                <img class="weight_icon" src="img/weight.png">
+                <p class="weight">999.99 kg</p>
+
+                <p class="copyright">&copy;2026 Pokémon / Nintendo / Creatures / GAME FREAK</p>
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="control-panel">
+                <h2>Generator Controls</h2>
+                <div class="control-group">
+                    <select id="menu_pokemon">
+                        <option></option>
+                    </select>
+                    <p class="total">0 / 0 sheets</p>
+                </div>
+                <button id="download-btn">Download Image</button>
+                <p class="help-text">Make sure browser zoom is at 100% before downloading.</p>
+            </div>
+
+            <div class="roster-panel">
+                <h2>Pokémon Roster</h2>
+                <div class="button_table">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var aPokemonData;
+       $(document).ready(function() {
+            $("#download-btn").click(function() {
+                const element = document.getElementById('capture');
+
+                // Ajout des options pour gérer le Cross-Origin (CORS)
+                html2canvas(element, {
+                    useCORS: true,        // Autorise le chargement d'images externes via CORS
+                    allowTaint: false,    // Empêche de "souiller" le canvas avec des données non sécurisées
+                    logging: false        // Changez en true si vous voulez déboguer dans la console
+                }).then(canvas => {
+                    try {
+                        // Création du lien de téléchargement
+                        const link = document.createElement('a');
+                        link.download = $(".index").html() + '-' + $(".card_name").html()  + '.png';
+                        
+                        // On génère l'URL de l'image
+                        link.href = canvas.toDataURL("image/png");
+
+                        // Ajout, clic et suppression du lien
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    } catch (err) {
+                        console.error("Erreur lors de l'exportation de l'image :", err);
+                        alert("Impossible de capturer l'image à cause de restrictions de sécurité sur certaines ressources (CORS).");
+                    }
+                });
+            });
+
+            $.ajax({
+                url: 'data/data_r.csv', // Path to your CSV file
+                dataType: 'text',
+                success: function(csvData) {
+                    // Process the data once it's successfully loaded
+                    parseCsvWithPlugin(csvData);
+                }
+            });
+
+        });
+
+        function parseCsvWithPlugin(csvData) {
+            // Convert to a 2D array
+            var arrayData = $.csv.toArrays(csvData);
+            var lastId = 0;
+
+            var params = new URLSearchParams(window.location.search);
+            var urlId = params.get("id");
+
+            // Convert to an array of objects (useful if your CSV has a header row)
+            aPokemonData = $.csv.toObjects(csvData);
+            //Fill Menu deroulant with list of pokemon
+            var $select = $("#menu_pokemon");
+            var totalPokemon = 0;
+            
+
+            // Remove existing options
+            $select.empty();
+            $.each(aPokemonData, function(index, pokemon) {
+
+                var paddedID = String(pokemon.ID).padStart(4, '0');
+
+                
+                if (pokemon.Name && pokemon.Name.trim() !== "") {
+                    lastId = parseInt(pokemon.ID, 10) - 1;
+                    $select.append(
+                        $("<option>", {
+                            value: pokemon.ID,
+                            text: "#" + paddedID + " " + pokemon.Name,
+                            selected: urlId ? (pokemon.ID == urlId) : true
+                        })
+                        
+                    );
+                    totalPokemon = totalPokemon+1;
+                    $(".button_table").append('<button class="pokemon_button gen' + getPokemonGeneration(pokemon.ID) + '" id="' + pokemon.ID + '"><img src="img/sprite/' + paddedID + ' ' + pokemon.Name + '.png"></button>');
+
+
+                }
+
+            });
+
+            $(".total").html(totalPokemon + ' / ' + (totalPokemon/9).toFixed(2)  + ' sheets');
+
+            $select.on("change", function() {
+
+                var selectedValue = $(this).val();
+
+                // Add ID to URL as parameter
+                var url = new URL(window.location);
+                url.searchParams.set("id", selectedValue);
+                window.history.replaceState({}, "", url);
+
+                // Load the data
+                loadPokemonData(selectedValue - 1);
+
+            });
+
+            if (urlId) {
+                loadPokemonData(parseInt(urlId, 10) - 1);
+            } else {
+                loadPokemonData(lastId);
+            }
+
+            $(".pokemon_button").on("click", function() {
+
+                var id = parseInt(this.id, 10);
+
+                // Update select menu
+                $("#menu_pokemon").val(id);
+
+                // Update URL
+                var url = new URL(window.location);
+                url.searchParams.set("id", id);
+                window.history.replaceState({}, "", url);
+
+                // Load Pokémon data
+                loadPokemonData(id-1);
+
+            });
+
+        }
+
+        function loadPokemonData(index) {
+            var indexPokemon = index;
+            console.log(aPokemonData[indexPokemon]);
+
+            var ID = aPokemonData[indexPokemon].ID;
+            var name = aPokemonData[indexPokemon].Name;
+            var ability_r_name = aPokemonData[indexPokemon].Ability_R_Name;
+            var ability_r_effect = aPokemonData[indexPokemon].Ability_R_Effect;
+            var rarity = aPokemonData[indexPokemon].Rarity;
+            var type1 = aPokemonData[indexPokemon].Type1;
+            var type2 = aPokemonData[indexPokemon].Type2;      
+
+            if (rarity == "L") {
+                $(".card_frame").attr("src", "img/base_frame/" + rarity + "_simple.png");
+            }else{
+                $(".card_frame").attr("src", "img/base_frame/N_simple.png");
+            }
+        
+            $(".card_name").html(name);
+
+            var paddedID = String(ID).padStart(4, '0');
+
+
+            $(".card_portrait").show();
+            $(".a_box_border").show();
+            $(".card_portrait").attr("src", "img/sprite/" + paddedID + " " + name + ".png");
+
+            $(".gen_tag").html(getPokemonGeneration(ID) + ' - ' + getPokemonRegion(ID));
+            if(ability_r_name.length){
+                $(".ability_name").show();
+                $(".ability_text").show();
+
+                $(".ability_name").html(ability_r_name);
+                $(".ability_text").html(replaceTypeIcons(ability_r_effect));
+
+                $(".ability_text").css("font-size", "36px");
+                $(".portrait_box").css("top", "150px");
+
+                if(ability_r_effect.length > 220){
+                    $(".ability_name").css("height", "212px");
+                    $(".ability_name").css("top", "619px");
+                    $(".ability_text").css("top", "684px");0
+                    $(".ability_text").css("font-size", "29px");
+                    $(".portrait_box").css("top", "100px");
+                }else if(ability_r_effect.length > 155){
+                    $(".ability_name").css("height", "212px");
+                    $(".ability_name").css("top", "619px");
+                    $(".ability_text").css("top", "684px");0
+                    $(".ability_text").css("font-size", "31px");
+                    $(".portrait_box").css("top", "100px");
+                }else if(ability_r_effect.length > 135){
+                    $(".ability_name").css("height", "237px");
+                    $(".ability_name").css("top", "593px");
+                    $(".ability_text").css("top", "655px");
+                }else if(ability_r_effect.length > 90){
+                    $(".ability_name").css("height", "193px");
+                    $(".ability_name").css("top", "640px");
+                    $(".ability_text").css("top", "700px");
+                }else if(ability_r_effect.length > 50){
+                    $(".ability_name").css("height", "140px");
+                    $(".ability_name").css("top", "693px");
+                    $(".ability_text").css("top", "750px");
+                }else{
+                    $(".ability_name").css("height", "100px");
+                    $(".ability_name").css("top", "730px");
+                    $(".ability_text").css("top", "790px");
+                }
+            }else{
+                $(".ability_name").hide();
+                $(".ability_text").hide();
+            }
+
+            $(".index").html(paddedID + ' - ' + getPokemonRegion(ID));
+
+            getPokemonDimensions(ID).then(pokemon => {
+                if (pokemon) {
+                    console.log(`${pokemon.name.toUpperCase()} (#${pokemon.id}):`);
+                    console.log(`Height: ${pokemon.height.meters} m (${pokemon.height.cm} cm)`);
+                    console.log(`Weight: ${pokemon.weight.kg} kg`);
+
+                    $(".height").html(pokemon.height.meters + " m");
+                    $(".weight").html(pokemon.weight.kg + " kg");
+                }
+            });
+
+            $(".p1_type").attr("src", "img/type/" + type1 + ".png");
+            $(".c1_type").attr("src", "img/type/" + type1 + ".png");
+
+            $(".card_content").css("background-image", "url('../img/background/" + type1 + ".jpg')");
+            $(".card_content").css("width", "810px");
+            $(".card_content").css("height", "1110px");
+            $(".card_content").css("background-repeat", "no-repeat");
+            $(".card_content").css("background-position-x", "30px");
+            $(".card_content").css("background-size", "750px 1100px");
+            $(".a_box").css("border-radius", "15px");
+            $(".m1_box").css("border-radius", "15px");
+            $(".m2_box").css("border-radius", "15px");
+
+            $(".card_content").css("background-color", "black");
+            
+            var nbType = 1;
+            if (type2) {
+                $(".p2_type").show();
+                $(".p2_type").attr("src", "img/type/" + type2 + ".png");
+                $(".gradient_box").css("background", 
+                    "linear-gradient(to left, " + returnTypeColor(type1) + ", " + returnTypeColor(type2) + ")"
+                );
+
+                $(".gradient_box_2").css("background", 
+                    "linear-gradient(to left, " + returnTypeColor(type1) + ", " + returnTypeColor(type2) + ")"
+                );
+
+                $(".c2_type").show();
+                $(".c2_type").attr("src", "img/type/" + type2 + ".png");
+
+                $(".generic_cost").css("left", "594px");
+                nbType++;
+            }else{
+                $(".p2_type").hide();
+                $(".gradient_box").css("background", 
+                    "linear-gradient(to left, " + returnTypeColor(type1) + ", " + returnTypeColor(type1) + ")"
+                );
+
+                $(".gradient_box_2").css("background", 
+                    "linear-gradient(to left, " + returnTypeColor(type1) + ", " + returnTypeColor(type1) + ")"
+                );
+
+                $(".c2_type").hide();
+                $(".generic_cost").css("left", "648px");
+            }
+            $(".generic_cost").show();
+
+            var nbPip = 1;
+            if (type2) {
+                switch (rarity) {
+                    case "B": // Cost 2
+                        nbPip = 2;
+                        $(".c1").attr("src", "img/type/" + type1 + ".png");
+                        $(".c2").attr("src", "img/type/" + type2 + ".png");
+                        break;
+                    case "I": // Cost 3
+                        nbPip = 2;
+                        $(".c1").attr("src", "img/type/" + type1 + ".png");
+                        $(".c2").attr("src", "img/type/" + type2 + ".png");
+                        break;
+                    case "A": // Cost 5
+                        nbPip = 3;
+                        $(".c1").attr("src", "img/type/" + type1 + ".png");
+                        $(".c2").attr("src", "img/type/" + type1 + ".png");
+                        $(".c3").attr("src", "img/type/" + type2 + ".png");
+                        break;
+                    case "E": // Cost 7
+                        nbPip = 4;
+                        $(".c1").attr("src", "img/type/" + type1 + ".png");
+                        $(".c2").attr("src", "img/type/" + type1 + ".png");
+                        $(".c3").attr("src", "img/type/" + type2 + ".png");
+                        $(".c4").attr("src", "img/type/" + type2 + ".png");
+                        break;
+                    case "M": // Cost 9
+                        nbPip = 5;
+                        $(".c1").attr("src", "img/type/" + type1 + ".png");
+                        $(".c2").attr("src", "img/type/" + type1 + ".png");
+                        $(".c3").attr("src", "img/type/" + type1 + ".png");
+                        $(".c4").attr("src", "img/type/" + type2 + ".png");
+                        $(".c5").attr("src", "img/type/" + type2 + ".png");
+                        break;
+                    case "L": // Cost 12
+                        nbPip = 6;
+                        $(".c1").attr("src", "img/type/" + type1 + ".png");
+                        $(".c2").attr("src", "img/type/" + type1 + ".png");
+                        $(".c3").attr("src", "img/type/" + type1 + ".png");
+                        $(".c4").attr("src", "img/type/" + type2 + ".png");
+                        $(".c5").attr("src", "img/type/" + type2 + ".png");
+                        $(".c6").attr("src", "img/type/" + type2 + ".png")
+                        break;
+                    default:
+                        // Code runs if no cases match
+                }
+            }else{
+                switch (rarity) {
+                    case "B": // Cost 2
+                        nbPip = 1;
+                        $(".c1").attr("src", "img/type/" + type1 + ".png");
+                        break;
+                    case "I": // Cost 3
+                        nbPip = 1;
+                        $(".c1").attr("src", "img/type/" + type1 + ".png");
+                        break;
+                    case "A": // Cost 5
+                        nbPip = 2;
+                        $(".c1").attr("src", "img/type/" + type1 + ".png");
+                        $(".c2").attr("src", "img/type/" + type1 + ".png");
+                        break;
+                    case "E": // Cost 7
+                        nbPip = 3;
+                        $(".c1").attr("src", "img/type/" + type1 + ".png");
+                        $(".c2").attr("src", "img/type/" + type1 + ".png");
+                        $(".c3").attr("src", "img/type/" + type1 + ".png");
+                        break;
+                    case "M": // Cost 9
+                        nbPip = 4;
+                        $(".c1").attr("src", "img/type/" + type1 + ".png");
+                        $(".c2").attr("src", "img/type/" + type1 + ".png");
+                        $(".c3").attr("src", "img/type/" + type1 + ".png");
+                        $(".c4").attr("src", "img/type/" + type1 + ".png");
+                        break;
+                    case "L": // Cost 12
+                        nbPip = 5;
+                        $(".c1").attr("src", "img/type/" + type1 + ".png");
+                        $(".c2").attr("src", "img/type/" + type1 + ".png");
+                        $(".c3").attr("src", "img/type/" + type1 + ".png");
+                        $(".c4").attr("src", "img/type/" + type1 + ".png");
+                        $(".c5").attr("src", "img/type/" + type1 + ".png");
+                        break;
+                    default:
+                        // Code runs if no cases match
+                }
+            }
+
+            $('img.cost_icon').show();
+
+            $('img.cost_icon').filter(function() {
+                // Extract the class starting with "c" followed by numbers
+                let match = this.className.match(/\bc(\d+)\b/);
+                if (match) {
+                    let classNum = parseInt(match[1], 10);
+                    return classNum > nbPip;
+                }
+                return false;
+            }).hide();
+
+            $(".generic_cost").css("left", 700-(nbPip*50) + "px");
+
+            switch (rarity) {
+                case "B": // Cost 2
+                    if(nbType > 1){
+                        $(".generic_cost").hide();
+                    }else{
+                        $(".generic_cost").show();
+                    }
+                    $(".generic_cost").html("1");
+
+                    $(".capture_rate").html(1);
+                    break;
+                case "I": // Cost 3
+                    $(".generic_cost").html(3-nbPip);
+                    $(".capture_rate").html(3);
+                    break;
+                case "A": // Cost 5
+                    $(".generic_cost").html(5-nbPip);
+                    $(".capture_rate").html(6);
+                    break;
+                case "E": // Cost 7
+                    $(".generic_cost").html(7-nbPip);
+                    $(".capture_rate").html(9);
+                    break;
+                case "M": // Cost 9
+                    $(".generic_cost").html(9-nbPip);
+                    $(".capture_rate").html(12);
+                    break;
+                case "L": // Cost 12
+                    $(".generic_cost").html(12-nbPip);
+                    $(".capture_rate").html(15);
+                    break;
+                default:
+                    // Code runs if no cases match
+            }
+        }
+
+        function returnRarityColor(Rarity) {
+            switch (Rarity) {
+                case "A":
+                    return "#324aa8"; // blue
+                case "B":
+                    return "#e352d7"; // pink
+                case "E":
+                    return "#8421db"; // purple
+                case "I":
+                    return "#2ebf5c"; // green
+                case "L":
+                    return "#f5d02f"; // gold
+                case "M":
+                    return "#e3000b"; // red
+                default:
+                    return "#FFFFFF"; // white for anything else
+            }
+        }
+
+        function returnTypeColor(type) {
+            switch (type.toLowerCase()) { // make it case-insensitive
+                case "normal": return "#A8A77A";
+                case "fire": return "#EE8130";
+                case "water": return "#6390F0";
+                case "electric": return "#F7D02C";
+                case "grass": return "#7AC74C";
+                case "ice": return "#96D9D6";
+                case "fighting": return "#C22E28";
+                case "poison": return "#A33EA1";
+                case "ground": return "#E2BF65";
+                case "flying": return "#A98FF3";
+                case "psychic": return "#F95587";
+                case "bug": return "#A6B91A";
+                case "rock": return "#B6A136";
+                case "ghost": return "#735797";
+                case "dragon": return "#6F35FC";
+                case "dark": return "#3d2e23";
+                case "steel": return "#B7B7CE";
+                case "fairy": return "#D685AD";
+                default: return "#FFFFFF"; // default white if unknown type
+            }
+        }   
+        
+        function getPokemonGeneration(id) {
+
+            id = parseInt(id, 10);
+
+            if (isNaN(id) || id <= 0) return null;
+
+            if (id <= 151) return 1;
+            if (id <= 251) return 2;
+            if (id <= 386) return 3;
+            if (id <= 493) return 4;
+            if (id <= 649) return 5;
+            if (id <= 721) return 6;
+            if (id <= 809) return 7;
+            if (id <= 905) return 8;
+            if (id <= 1025) return 9;
+
+            return null; // future Pokémon
+        }
+
+        function getPokemonRegion(id) {
+
+            id = parseInt(id, 10);
+
+            if (isNaN(id) || id <= 0) return null;
+
+            if (id <= 151) return "Kanto";
+            if (id <= 251) return "Johto";
+            if (id <= 386) return "Hoenn";
+            if (id <= 493) return "Sinnoh";
+            if (id <= 649) return "Unova";
+            if (id <= 721) return "Kalos";
+            if (id <= 809) return "Alola";
+            if (id <= 905) return "Galar";
+            if (id <= 1025) return "Paldea";
+
+            return null; // future Pokémon
+        }
+
+        function replaceTypeIcons(text) {
+            const iconMap = {
+                "ALL": "all.png",
+                "BUG": "bug.png",
+                "DRK": "dark.png",
+                "DRG": "dragon.png",
+                "ELE": "electric.png",
+                "FAR": "fairy.png",
+                "FIG": "fighting.png",
+                "FIR": "fire.png",
+                "FLY": "flying.png",
+                "GHO": "ghost.png",
+                "GRA": "grass.png",
+                "GRD": "ground.png",
+                "ICE": "ice.png",
+                "NOR": "normal.png",
+                "POS": "poison.png",
+                "PSY": "psychic.png",
+                "ROC": "rock.png",
+                "STE": "steel.png",
+                "WAT": "water.png"
+            };
+
+            // Matches EITHER {braced_code} OR standalone +number/-number/+X/-X
+            return text.replace(/\{([A-Za-z0-9]+)\}|([+-][\dX\x]+)/g, function(match, bracedCode, statModifier) {
+
+                // 1. Handle standalone +2, -1, +X, -X (no braces required)
+                if (statModifier) {
+                    const isNegative = statModifier.startsWith('-');
+                    const colorClass = isNegative ? "stat_modifier_red" : "stat_modifier_yellow";
+                    return `<span class="${colorClass}">${statModifier.toUpperCase()}</span>`;
+                }
+
+                // 2. Handle braced items: {3}, {X} -> PIP
+                if (/^(\d+|x)$/i.test(bracedCode)) {
+                    return `<span class="numeric_pip move_icons_text">${bracedCode.toUpperCase()}</span>`;
+                }
+
+                // 3. Handle braced items: {ELE} -> Type Icon
+                let upperCode = bracedCode.toUpperCase();
+                if (iconMap[upperCode]) {
+                    return `<img class="move_icons_text" src="img/type/${iconMap[upperCode]}">`;
+                }
+
+                return match;
+            });
+        }
+
+        /**
+         * Fetches a Pokémon's height and weight by name or ID.
+         * @param {string|number} pokemonNameOrId - The name or ID of the Pokémon.
+         */
+        async function getPokemonDimensions(pokemonNameOrId) {
+        // PokéAPI requires names to be lowercase
+        const searchName = pokemonNameOrId.toString().toLowerCase().trim();
+        const url = `https://pokeapi.co/api/v2/pokemon/${searchName}`;
+
+        try {
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+            throw new Error(`Pokémon "${pokemonNameOrId}" not found.`);
+            }
+
+            const data = await response.json();
+            
+            // Extract and convert raw units (decimeters & hectograms)
+            const heightInMeters = data.height / 10; 
+            const weightInKilograms = data.weight / 10; 
+
+            return {
+            name: data.name,
+            id: data.id,
+            height: {
+                raw: data.height,
+                meters: heightInMeters,
+                cm: data.height * 10
+            },
+            weight: {
+                raw: data.weight,
+                kg: weightInKilograms
+            }
+            };
+        } catch (error) {
+            console.error("Error fetching Pokémon data:", error.message);
+            return null;
+        }
+        }
+
+    </script>
+
+</body>
+</html>

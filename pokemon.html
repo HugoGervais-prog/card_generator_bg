@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon card generator</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:100,300,400,700,900" rel="stylesheet">
+
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cal+Sans&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <link href="css/pokemon.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="js/jquery-google-sheet-to-json.js"></script>
+    <script src="js/jquery.csv.js"></script>
+
+</head>
+<body>
+    <!-- Main Content -->
+    <main>
+        <div style="float:left;" class="card_content" id="capture">
+            <!-- Color Corner -->
+            <div class="type_corner">&nbsp;</div>
+            <div class="type_corner2">&nbsp;</div>
+
+            <!-- Pokeball -->
+            <img class="icon_background" src="img/planet-satellite-svgrepo-com.png">
+            <!-- background -->
+            <img class="background" src="img/background/poly.jpg">
+
+            <!-- Rarity -->
+            <img class="rarity" src="img/rarity/5.png">
+
+            <!-- Trainer -->
+            <img class="trainer" src="img/trainer/Brock.png">
+
+            <!-- Portrait -->
+            <div class="portrait_box">
+                <img class="card_portrait" src="img/sprite/0001 Bulbasaur.png">
+            </div>
+            <!-- move -->
+            <div class="m1_power">A</div>
+            <img class="m1_type" src="img/type/grass.png">
+
+            <div class="m2_power">3</div>
+            <img class="m2_type" src="img/type/poison.png">
+
+            <div class="m3_power">3</div>
+            <img class="m3_type" src="img/type/normal.png">
+
+            <div class="m4_power">3</div>
+            <img class="m4_type" src="img/type/normal.png">
+
+
+            <img class="aura" src="img/type/rock.png">
+            <div class="aura_power">+1</div>
+
+
+        </div>
+
+        <select id="menu_pokemon" style="float:left;font-size:16px;margin-left:10px;padding: 10px;">
+            <option></option>
+        </select>
+        <button style="float:left;font-size:16px;margin-left:10px;padding: 10px;" id="download-btn">Download Image</button>
+        <p class="total">0 / 0 feuilles</p>
+
+        <div class="table" style="overflow: hidden;max-height: 160px;">
+            <div class="button_table">
+            </div>
+        </div>
+
+
+    </main>
+</body>
+
+<script>
+        var aPokemonData;
+       $(document).ready(function() {
+            $("#download-btn").click(function() {
+                const element = document.getElementById('capture');
+
+                // Ajout des options pour gérer le Cross-Origin (CORS)
+                html2canvas(element, {
+                    useCORS: true,        // Autorise le chargement d'images externes via CORS
+                    allowTaint: false,    // Empêche de "souiller" le canvas avec des données non sécurisées
+                    logging: false        // Changez en true si vous voulez déboguer dans la console
+                }).then(canvas => {
+                    try {
+                        // Création du lien de téléchargement
+                        const link = document.createElement('a');
+                        var pkmSelect = document.getElementById("menu_pokemon");
+                        var selectedText = pkmSelect.options[pkmSelect.selectedIndex].text;
+                        link.download = selectedText  + '.png';
+                        
+                        // On génère l'URL de l'image
+                        link.href = canvas.toDataURL("image/png");
+
+                        // Ajout, clic et suppression du lien
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    } catch (err) {
+                        console.error("Erreur lors de l'exportation de l'image :", err);
+                        alert("Impossible de capturer l'image à cause de restrictions de sécurité sur certaines ressources (CORS).");
+                    }
+                });
+            });
+
+            $.ajax({
+                url: 'data/triad.csv', // Path to your CSV file
+                dataType: 'text',
+                success: function(csvData) {
+                    // Process the data once it's successfully loaded
+                    parseCsvWithPlugin(csvData);
+                }
+            });
+        });
+
+        function parseCsvWithPlugin(csvData) {
+            // Convert to a 2D array
+            var arrayData = $.csv.toArrays(csvData);
+            var lastId = 0;
+
+            var params = new URLSearchParams(window.location.search);
+            var urlId = params.get("index");
+
+            // Convert to an array of objects (useful if your CSV has a header row)
+            aPokemonData = $.csv.toObjects(csvData);
+            //Fill Menu deroulant with list of pokemon
+            var $select = $("#menu_pokemon");
+            var totalPokemon = 0;
+            
+
+            // Remove existing options
+            $select.empty();
+            $.each(aPokemonData, function(index, pokemon) {
+                var paddedID = String(pokemon.ID).padStart(4, '0');
+
+                
+                if (pokemon.Name && pokemon.Name.trim() !== "") {
+                    lastId = parseInt(pokemon.Index, 10) - 1;
+                    $select.append(
+                        $("<option>", {
+                            value: pokemon.Index,
+                            text: pokemon.Trainer + " #" + paddedID + " - " + pokemon.Name,
+                            selected: urlId ? (pokemon.Index == urlId) : true
+                        })
+                        
+                    );
+                    totalPokemon = totalPokemon+1;
+                    $(".button_table").append('<button style="background-color:var(--' + pokemon.Trainer.toLowerCase() + '2)" class="pokemon_button" id="' + pokemon.Index + '"><img src="img/sprite/' + paddedID + ' ' + pokemon.Name + '.png"></button>');
+
+
+                }
+
+            });
+
+            $(".total").html(totalPokemon + ' / ' + (totalPokemon/9).toFixed(2)  + ' sheets');
+
+            $select.on("change", function() {
+
+                var selectedValue = $(this).val();
+
+                // Add ID to URL as parameter
+                var url = new URL(window.location);
+                url.searchParams.set("id", selectedValue);
+                window.history.replaceState({}, "", url);
+
+                // Load the data
+                loadPokemonData(selectedValue - 1);
+
+            });
+
+            if (urlId) {
+                loadPokemonData(parseInt(urlId, 10) - 1);
+            } else {
+                loadPokemonData(lastId);
+            }
+
+            $(".pokemon_button").on("click", function() {
+
+                var index = parseInt(this.id, 10);
+
+                // Update select menu
+                $("#menu_pokemon").val(index);
+
+                // Update URL
+                var url = new URL(window.location);
+                url.searchParams.set("index", index);
+                window.history.replaceState({}, "", url);
+
+                // Load Pokémon data
+                loadPokemonData(index-1);
+
+            });
+        }
+
+        function loadPokemonData(index) {
+            var indexPokemon = index;
+
+            var index = aPokemonData[indexPokemon].Index;
+            var ID = aPokemonData[indexPokemon].ID;
+            var name = aPokemonData[indexPokemon].Name;
+            var trainer = aPokemonData[indexPokemon].Trainer;
+            var Rarity = aPokemonData[indexPokemon].Rarity;
+
+            var TopPower = aPokemonData[indexPokemon].Top_Power;
+            /*if(TopPower == 10){TopPower = "A"};*/
+            var TopType = aPokemonData[indexPokemon].Top_Type;
+
+            var RightPower = aPokemonData[indexPokemon].Right_Power;
+            /*if(RightPower == 10){RightPower = "A"};*/
+            var RightType = aPokemonData[indexPokemon].Right_Type;
+
+            var LeftPower = aPokemonData[indexPokemon].Left_Power;
+            /*if(LeftPower == 10){LeftPower = "A"};*/
+            var LeftType = aPokemonData[indexPokemon].Left_Type;
+
+            var BottomPower = aPokemonData[indexPokemon].Bottom_Power;
+            /*if(BottomPower == 10){BottomPower = "A"};*/
+            var BottomType = aPokemonData[indexPokemon].Bottom_Type;
+
+            var PowerUpType = aPokemonData[indexPokemon].PowerUpType;
+
+
+            var paddedID = String(ID).padStart(4, '0');
+
+            $(".card_portrait").attr("src", "img/sprite/" + paddedID + " " + name + ".png");
+            $(".trainer").attr("src", "img/trainer/" + trainer + ".png");
+            $(".rarity").attr("src", "img/rarity/" + Rarity + ".png");
+            
+
+            $(".m1_power").html(TopPower);
+            $(".m1_power").css("background-color", returnTypeColor(TopType));
+            $(".m1_type").attr("src", "img/type/" + TopType + ".png");
+
+            $(".m2_power").html(LeftPower);
+            $(".m2_power").css("background-color", returnTypeColor(LeftType));
+            $(".m2_type").attr("src", "img/type/" + LeftType + ".png");
+
+            $(".m3_power").html(RightPower);
+            $(".m3_power").css("background-color", returnTypeColor(RightType));
+            $(".m3_type").attr("src", "img/type/" + RightType + ".png");
+
+            $(".m4_power").html(BottomPower);
+            $(".m4_power").css("background-color", returnTypeColor(BottomType));
+            $(".m4_type").attr("src", "img/type/" + BottomType + ".png");
+
+            $(".type_corner").css("background-image","linear-gradient(to bottom,var(--" + trainer.toLowerCase() + "),var(--" + trainer.toLowerCase() + "2))");
+
+            if(PowerUpType){
+                $(".aura").attr("src", "img/type/" + PowerUpType + ".png");
+                $(".aura_power").show();
+                $(".aura").show();
+            }else{
+                $(".aura_power").hide();
+                $(".aura").hide();
+            }
+
+
+        }
+
+        function returnTypeColor(type) {
+            switch (type.toLowerCase()) { // make it case-insensitive
+                case "normal": return "#909aa4";
+                case "fire": return "#EE8130";
+                case "water": return "#6390F0";
+                case "electric": return "#F7D02C";
+                case "grass": return "#7AC74C";
+                case "ice": return "#96D9D6";
+                case "fighting": return "#C22E28";
+                case "poison": return "#ac6acd";
+                case "ground": return "#d87943";
+                case "flying": return "#A98FF3";
+                case "psychic": return "#F95587";
+                case "bug": return "#A6B91A";
+                case "rock": return "#c9b78e";
+                case "ghost": return "#735797";
+                case "dragon": return "#6F35FC";
+                case "dark": return "#3d2e23";
+                case "steel": return "#B7B7CE";
+                case "fairy": return "#D685AD";
+                default: return "#FFFFFF"; // default white if unknown type
+            }
+        }   
+        
+        function getPokemonGeneration(id) {
+
+            id = parseInt(id, 10);
+
+            if (isNaN(id) || id <= 0) return null;
+
+            if (id <= 151) return 1;
+            if (id <= 251) return 2;
+            if (id <= 386) return 3;
+            if (id <= 493) return 4;
+            if (id <= 649) return 5;
+            if (id <= 721) return 6;
+            if (id <= 809) return 7;
+            if (id <= 905) return 8;
+            if (id <= 1025) return 9;
+
+            return null; // future Pokémon
+        }
+
+        function getPokemonRegion(id) {
+
+            id = parseInt(id, 10);
+
+            if (isNaN(id) || id <= 0) return null;
+
+            if (id <= 151) return "Kanto";
+            if (id <= 251) return "Johto";
+            if (id <= 386) return "Hoenn";
+            if (id <= 493) return "Sinnoh";
+            if (id <= 649) return "Unova";
+            if (id <= 721) return "Kalos";
+            if (id <= 809) return "Alola";
+            if (id <= 905) return "Galar";
+            if (id <= 1025) return "Paldea";
+
+            return null; // future Pokémon
+        }
+
+
+    </script>

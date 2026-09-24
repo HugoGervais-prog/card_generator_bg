@@ -1,0 +1,55 @@
+Index,ID,Name,Trainer,Top_Power,Top_Type,Right_Power,Right_Type,Bottom_Power,Bottom_Type,Left_Power,Left_Type,Rarity,PowerUpType,Total
+1,74,Geodude,Brock,3,Ground,3,Rock,2,Normal,5,Rock,1,,13
+2,75,Graveler,Brock,5,Rock,6,Rock,4,Ground,4,Normal,2,,19
+3,76,Golem,Brock,9,Rock,3,Ground,7,Rock,4,Steel,3,,23
+4,95,Onix,Brock,6,Rock,6,Rock,4,Steel,3,Dragon,2,,19
+5,208,Steelix,Brock,7,Steel,5,Rock,3,Ground,8,Steel,3,,23
+6,208,Steelix Mega,Brock,9,Steel,7,Rock,5,Ground,10,Steel,M,,31
+7,111,Rhyhorn,Brock,2,Normal,5,Rock,4,Ground,7,Rock,2,,18
+8,112,Rhydon,Brock,5,Ground,4,Normal,6,Ground,8,Rock,3,,23
+9,464,Rhyperior,Brock,8,Ground,6,Rock,7,Ground,9,Rock,4,,30
+10,138,Omanyte,Brock,3,Water,4,Rock,2,Water,3,Rock,2,,12
+11,139,Omastar,Brock,6,Water,7,Rock,5,Water,5,Rock,3,,23
+12,140,Kabuto,Brock,4,Rock,3,Water,2,Water,4,Rock,2,,13
+13,141,Kabutops,Brock,6,Rock,5,Water,4,Water,7,Rock,3,,22
+14,408,Cranidos,Brock,5,Rock,2,Dark,3,Rock,4,Ground,1,,14
+15,409,Rampardos,Brock,9,Rock,3,Dark,5,Ground,6,Rock,3,,23
+16,369,Relicanth,Brock,5,Water,6,Rock,4,Water,5,Rock,2,,20
+17,74,Geodude Alola,Brock,3,Electric,4,Rock,2,Electric,3,Rock,1,,12
+18,75,Graveler Alola,Brock,5,Electric,6,Rock,4,Electric,5,Rock,2,,20
+19,76,Golem Alola,Brock,7,Electric,8,Rock,5,Electric,6,Rock,3,,26
+20,246,Larvitar,Brock,3,Rock,2,Ground,3,Dark,4,Rock,1,,12
+21,247,Pupitar,Brock,5,Ground,4,Rock,5,Ground,4,Dark,2,,18
+22,248,Tyranitar,Brock,8,Dark,7,Rock,6,Ground,7,Rock,4,,28
+23,248,Tyranitar Mega,Brock,10,Dark,8,Rock,7,Ground,9,Rock,M,,34
+24,38,Ninetales,Brock,7,Fire,6,Fairy,5,Fire,6,Ghost,3,,24
+25,142,Aerodactyl,Brock,7,Rock,6,Flying,5,Dragon,6,Rock,4,,24
+26,142,Aerodactyl Mega,Brock,9,Rock,8,Flying,6,Dragon,8,Rock,M,,31
+27,377,Regirock,Brock,8,Rock,7,Rock,7,Rock,8,Rock,5,Rock,30
+28,1,Bulbasaur,Red,3,Grass,4,Poison,2,Grass,3,Normal,1,,12
+29,2,Ivysaur,Red,6,Grass,4,Poison,4,Grass,4,Normal,2,,18
+30,3,Venusaur,Red,7,Grass,5,Poison,6,Grass,4,Ground,3,,22
+31,3,Venusaur Mega,Red,9,Grass,7,Poison,8,Grass,6,Ground,M,,30
+32,4,Charmander,Red,4,Fire,3,Dragon,2,Fire,3,Normal,1,,12
+33,5,Charmeleon,Red,5,Fire,5,Dragon,4,Fire,4,Normal,2,,18
+34,6,Charizard,Red,8,Fire,7,Flying,6,Dragon,5,Fire,3,,26
+35,6,Charizard Mega X,Red,10,Fire,8,Dragon,7,Fire,6,Dark,M,,31
+36,7,Squirtle,Red,3,Water,4,Water,3,Steel,2,Normal,1,,12
+37,8,Wartortle,Red,6,Water,5,Water,4,Steel,3,Normal,2,,18
+38,9,Blastoise,Red,7,Water,6,Water,6,Steel,5,Ice,3,,24
+39,9,Blastoise Mega,Red,9,Water,8,Water,7,Steel,6,Ice,M,,30
+40,196,Espeon,Red,6,Psychic,5,Psychic,4,Fairy,3,Normal,2,,18
+41,446,Munchlax,Red,4,Normal,2,Normal,3,Ground,3,Normal,1,,12
+42,143,Snorlax,Red,7,Normal,5,Normal,6,Ground,5,Normal,3,,23
+43,131,Lapras,Red,6,Water,5,Ice,6,Water,5,Ice,3,,22
+44,68,Machamp,Red,7,Fighting,6,Fighting,5,Rock,6,Dark,3,,24
+45,59,Arcanine,Red,8,Fire,6,Fire,5,Normal,6,Dark,3,,25
+46,135,Jolteon,Red,7,Electric,6,Electric,4,Normal,5,Ghost,2,,22
+47,123,Scyther,Red,6,Flying,5,Bug,4,Flying,5,Normal,2,,20
+48,212,Scizor,Red,8,Steel,7,Bug,5,Steel,6,Dark,4,,26
+49,128,Tauros,Red,7,Normal,6,Normal,5,Ground,6,Fighting,3,,24
+50,147,Dratini,Red,3,Dragon,4,Water,3,Dragon,3,Normal,1,,13
+51,148,Dragonair,Red,5,Dragon,5,Water,4,Dragon,4,Normal,2,,18
+52,149,Dragonite,Red,9,Dragon,7,Flying,6,Dragon,7,Fire,4,,29
+53,25,Pikachu,Red,9,Electric,7,Electric,5,Steel,7,Normal,4,,28
+54,150,Mewtwo,Red,10,Psychic,9,Psychic,7,Fighting,7,Ghost,5,Psychic,33

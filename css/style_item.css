@@ -1,0 +1,177 @@
+:root {
+  --normal: #A8A77A;
+    --fire: #EE8130;
+	--water: #6390F0;
+	--electric: #F7D02C;
+	--grass: #7AC74C;
+	--ice: #96D9D6;
+	--fighting: #C22E28;
+	--poison: #A33EA1;
+	--ground: #E2BF65;
+	--flying: #A98FF3;
+	--psychic: #F95587;
+	--bug: #A6B91A;
+	--rock: #B6A136;
+	--ghost: #735797;
+	--dragon: #6F35FC;
+	--dark: #3d2e23;
+	--steel: #B7B7CE;
+	--fairy: #D685AD;
+}
+
+body {
+    font-family: Sans-serif;
+    margin: 20px;
+    background-color: #333;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px;
+}
+.card_content{
+    width: 810px;
+    height: 1110px;
+    background-image: url("../img/area/Pallet Town.jpg");
+    background-repeat: no-repeat;
+    background-position-y: 22px;
+    background-size: 790px 1000px;
+    background-color: black;
+}
+.card_name {
+    color: white;
+    position: absolute;
+    top: 876px;
+    left: 88px;
+    font-size: 60px;
+    text-align: left;
+    font-family: "Roboto Condensed", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    text-shadow: 3px 3px black;
+    text-align: center;
+    background-color: black;
+    padding-left: 25px;
+    padding-right: 25px;
+    border-radius: 15px;
+}
+.mana_cost{
+    color: white;
+    position: absolute;
+    top: -49px;
+    left: 51px;
+    height: 148px;
+    font-size: 100px;
+    text-align: left;
+    font-family: "Roboto Condensed", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    text-shadow: 3px 3px black;
+    background-color: black;
+    padding-left: 10px;
+    padding-right: 30px;
+    border-radius: 0px 0px 30px;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+}
+.card_portrait {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.pixelated {
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -o-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    -ms-interpolation-mode: nearest-neighbor;
+    image-rendering: pixelated;
+}
+.portrait_box {
+    position: absolute;
+    top: 155px;
+    left: 170px;
+    height: 512px;
+    width: 512px;
+}
+.ability_text {
+    color: white;
+    position: absolute;
+    top: 640px;
+    left: 125px;
+    font-size: 44px;
+    width: 580px;
+    height: 230px;
+    text-align: justify;
+    font-family: "Roboto Condensed", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    padding: 10px;
+}
+.index {
+    color: white;
+    position: absolute;
+    top: 932px;
+    left: 113px;
+    font-size: 48px;
+    width: 569px;
+    height: 60px;
+    text-align: left;
+    font-family: "Roboto Condensed", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    font-weight: 600;
+    color: white;
+    letter-spacing: -1px;
+}
+.c_icons {
+    position: absolute;
+    top: 911px;
+    left: 620px;
+    width: 180px;
+}
+.total{
+    color: white;
+    margin-left: 5px;
+}
+.button_table {
+    float: left;
+    margin-left: 10px;
+    width: 56%; /*55% for actual size or 64*/
+    position: absolute;
+    left:830px;
+    top: 70px;
+    height: 1060px;
+}
+.pokemon_button {
+    float: left;
+    width: 75px;
+    height: 75px;
+    cursor: pointer;
+}
+.pokemon_button img{
+    float: left;
+    width: 75px;
+    height: 75px;
+    margin-left:-9px;
+    margin-top:-3px;
+}
+.copyright {
+    color: white;
+    position: absolute;
+    top: 1025px;
+    left: 75px;
+    font-size: 22px;
+    width: 569px;
+    height: 60px;
+    text-align: left;
+    font-family: "Roboto Condensed", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    /* letter-spacing: -3px; */
+}
+.move_icons_text {
+    height: 120px; /* Base height */
+    display: inline-block;
+    margin-top: 10px;
+    margin-left: 10px;
+}
