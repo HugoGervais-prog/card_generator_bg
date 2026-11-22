@@ -177,15 +177,15 @@ ID,Name,Rarity,Type1,Type2,Ability_R_Name,Ability_R_Effect,Sheet,Points,Cost,Not
 143,Snorlax,M,Normal,,Gluttony,"+1 for each Pokémon adjacent to this Pokémon, and +1 more for each of them that is Normal-type.",,12,{5}{NOR}{NOR}{NOR}{NOR},,,,,2.1,460,Monster,Basic,,,,,
 144,Articuno,L,Ice,Flying,Legendary Snow Cloak,+4 for each Ice-type Pokémon on your board.,,17,{6}{ICE}{ICE}{ICE}{FLY}{FLY}{FLY},,,,,1.7,55.4,Undiscovered,Basic,,0144 Articuno.jpg,,38,18
 10169,Galarian Articuno,L,Psychic,Flying,Legendary Competitive,+3 for each Psychic-type Pokémon on your board.,,17,{6}{PSY}{PSY}{PSY}{FLY}{FLY}{FLY},,,Galar,0144 Articuno Galar,1.7,50.9,Undiscovered,Basic,,,,,
-145,Zapdos,L,Electric,Flying,Legendary Static,+3 for each Electric-type Pokémon on your board.,17,17,{6}{ELE}{ELE}{ELE}{FLY}{FLY}{FLY},,,,,1.6,52.6,Undiscovered,Basic,,,,,
-10170,Galarian Zapdos,L,Fighting,Flying,Legendary Defiant,+4 for each Fighting-type Pokémon on your board.,,17,{6}{FIG}{FIG}{FIG}{FLY}{FLY}{FLY},,,Galar,0145 Zapdos Galar,1.6,58.2,Undiscovered,Basic,,,,,
+145,Zapdos,L,Electric,Flying,Legendary Static,+3 for each Electric-type Pokémon on your board.,17,17,{6}{ELE}{ELE}{ELE}{FLY}{FLY}{FLY},,,,,1.6,52.6,Undiscovered,Basic,,0145 Zapdos.jpg,,,
+10170,Galarian Zapdos,L,Fighting,Flying,Legendary Defiant,+4 for each Fighting-type Pokémon on your board.,,17,{6}{FIG}{FIG}{FIG}{FLY}{FLY}{FLY},,,Galar,0145 Zapdos Galar,1.6,58.2,Undiscovered,Basic,,0145 Galarian Zapdos.jpg,,,
 146,Moltres,L,Fire,Flying,Legendary Flame Body,+3 for each Fire-type Pokémon on your board.,,17,{6}{FIR}{FIR}{FIR}{FLY}{FLY}{FLY},,,,,2,60,Undiscovered,Basic,,,,,
-10171,Galarian Moltres,L,Dark,Flying,Legendary Berserk,+4 for each Dark-type Pokémon on your board.,,17,{6}{DRK}{DRK}{DRK}{FLY}{FLY}{FLY},,,Galar,0146 Moltres Galar,2,66,Undiscovered,Basic,,,,,
+10171,Galarian Moltres,L,Dark,Flying,Legendary Berserk,+4 for each Dark-type Pokémon on your board.,,17,{6}{DRK}{DRK}{DRK}{FLY}{FLY}{FLY},,,Galar,0146 Moltres Galar,2,66,Undiscovered,Basic,,0146 Galarian Moltres.png,,,
 147,Dratini,B,Dragon,,,,,1,{1}{DRG},,,,,1.8,3.3,Water 1 / Dragon,Basic,,,,,
 148,Dragonair,E,Dragon,,,,,9,{4}{DRG}{DRG}{DRG},,,,,4,16.5,Water 1 / Dragon,Stage 1,147,,,,
 149,Dragonite,M,Dragon,Flying,Multiscale,This Pokémon gains all types of the Pokémon directly to its left and right. This does not count for Thesis scoring.,,12,{4}{DRG}{DRG}{DRG}{FLY}{FLY},,,,,2.2,210,Water 1 / Dragon,Stage 2,148,,,,
-150,Mewtwo,L,Psychic,,Pressure,"-X to each opponent's score and +X to this Pokémon, where X is the number of Psychic-type Pokémon on your board.",,17,{7}{PSY}{PSY}{PSY}{PSY}{PSY},,,,,2,122,Undiscovered,Basic,,,,,
-151,Mew,L,Psychic,,Synchronize,"This Pokémon gains the abilities of the Pokémon directly above and below it. It only copies printed abilities, never copied ones, and can't copy another copy ability.",,17,{7}{PSY}{PSY}{PSY}{PSY}{PSY},,,,,0.4,4,Undiscovered,Basic,,,,,
+150,Mewtwo,L,Psychic,,Pressure,"-X to each opponent's score and +X to this Pokémon, where X is the number of Psychic-type Pokémon on your board.",,17,{7}{PSY}{PSY}{PSY}{PSY}{PSY},,,,,2,122,Undiscovered,Basic,,0150 Mewtwo.jpg,,,0
+151,Mew,L,Psychic,,Synchronize,"This Pokémon gains the abilities of the Pokémon directly above and below it. It only copies printed abilities, never copied ones, and can't copy another copy ability.",,17,{7}{PSY}{PSY}{PSY}{PSY}{PSY},,,,,0.4,4,Undiscovered,Basic,,0151 Mew.jpg,,,32
 152,Chikorita,B,Grass,,,,,1,{1}{GRA},,,,,0.9,6.4,Monster / Grass,Basic,,,,,
 153,Bayleef,A,Grass,,,,,6,{3}{GRA}{GRA},,,,,1.2,15.8,Monster / Grass,Stage 1,152,,,,
 154,Meganium,M,Grass,,Overgrow,+2 to each Grass-type Pokémon adjacent to this Pokémon. This effect is negated if this Pokémon is adjacent to a Fire-type Pokémon.,18,12,{4}{GRA}{GRA}{GRA}{GRA},,,,,1.8,100.5,Monster / Grass,Stage 2,153,,,,

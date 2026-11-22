@@ -263,6 +263,7 @@ h2 {
 }
 .stage_box.evolved { padding-bottom: 8px; }
 .stage_box[hidden] { display: none; }
+.card_content.legendary .stage_box { display: none; } /* no stage badge on Legendary cards */
 .stage_label {
     font-size: 24px;
     font-weight: 700;
