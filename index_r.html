@@ -333,22 +333,33 @@
 
             $(".index").html(paddedID + ' - ' + pokemonRegion(p));
 
+            // Height, weight, egg groups (Height_m, Weight_kg, Egg_Groups) and the stage badge (Stage, Evolves_From)
+            // come from the CSV. PokéAPI is only called for a card whose cells are empty.
+            var statsFromCsv = p.Height_m != null && String(p.Height_m).trim() !== "";
+            var stageFromCsv = p.Stage != null && String(p.Stage).trim() !== "";
+            if (stageFromCsv) renderStageFromCsv(p);
+            if (statsFromCsv) {
+                $(".height").text(p.Height_m + " m");
+                $(".weight").text(p.Weight_kg + " kg");
+                $(".egg_groups").text(p.Egg_Groups || "");
+                fitEggGroups();
+            }
+
+            if (statsFromCsv && stageFromCsv) { lastDimsId = ID; /* everything is in the CSV */ } else
             if (ID === lastDimsId) { /* already fetched for this Pokémon */ } else
             getPokemonDimensions(lastDimsId = ID).then(pokemon => {
+                if (!aPokemonData[curIndex] || aPokemonData[curIndex].ID !== ID) return; // another card was opened meanwhile
                 if (pokemon) {
-                    console.log(`${pokemon.name.toUpperCase()} (#${pokemon.id}):`);
-                    console.log(`Height: ${pokemon.height.meters} m (${pokemon.height.cm} cm)`);
-                    console.log(`Weight: ${pokemon.weight.kg} kg`);
-
-                    $(".height").html(pokemon.height.meters + " m");
-                    $(".weight").html(pokemon.weight.kg + " kg");
-                    $(".egg_groups").text(pokemon.eggGroups.join(" / "));
-                    fitEggGroups();
-                    renderStage(pokemon.stage);
+                    if (!statsFromCsv) {
+                        $(".height").text(pokemon.height.meters + " m");
+                        $(".weight").text(pokemon.weight.kg + " kg");
+                        $(".egg_groups").text(pokemon.eggGroups.join(" / "));
+                        fitEggGroups();
+                    }
+                    if (!stageFromCsv) renderStage(pokemon.stage);
                 } else {
-                    renderStage(null);
-                    $(".egg_groups").text("");
-                    fitEggGroups(); // re-aligns the bar for the empty egg groups
+                    if (!stageFromCsv) renderStage(null);
+                    if (!statsFromCsv) { $(".egg_groups").text(""); fitEggGroups(); }
                 }
             });
 
@@ -859,6 +870,16 @@
             }
             return { stage: Math.min(count, 2), from: from };
         }
+        // Stage badge from the CSV: Stage = Basic / Stage 1 / Stage 2, Evolves_From = ID of the card shown in the bubble
+        function renderStageFromCsv(p) {
+            var $box = $(".stage_box").prop("hidden", false);
+            $box.find(".stage_label").text(String(p.Stage).trim().toUpperCase());
+            var pre = p.Evolves_From ? $.grep(aPokemonData, function(x) { return String(x.ID) === String(p.Evolves_From).trim(); })[0] : null;
+            $box.toggleClass("evolved", !!pre);
+            if (pre) $box.find(".evo_sprite").attr({ src: spritePath(pre), alt: pre.Name });
+        }
+
+        // Fallback when the CSV has no Stage: worked out from PokéAPI
         function renderStage(st) {
             var $box = $(".stage_box");
             if (!st) { $box.prop("hidden", true); return; }
