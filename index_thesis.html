@@ -48,8 +48,32 @@
                 <p class="help-text">Make sure browser zoom is at 100% before downloading.</p>
             </div>
 
+            <details class="edit-panel" open>
+                <summary><h2>Edit Thesis</h2></summary>
+                <div class="balance-note" hidden>
+                    <div class="balance-note-head"><span class="note_dot"></span><span class="balance-note-label"></span></div>
+                    <p class="balance-note-text"></p>
+                    <button id="resolve-note-btn" type="button">Mark resolved</button>
+                </div>
+                <div class="edit-grid">
+                    <label>Name<input id="edit-name"></label>
+                    <label>Icon<select id="edit-icon"><option value="">(none)</option></select></label>
+                    <label class="full"><span class="label-row">Description <span class="ref-tip" tabindex="0" aria-label="Symbol reference">?<span class="ref-tip-box"></span></span></span>
+                        <textarea id="edit-description" rows="4"></textarea>
+                        <span class="field-hint"><span id="description-length">0</span> characters &middot; icons: {WAT} {FIR} {GRA}&hellip; &middot; pips: {2} {X}</span>
+                    </label>
+                </div>
+                <div class="edit-buttons">
+                    <button id="revert-btn" type="button">Revert</button>
+                    <button id="save-btn" type="button">Save to CSV</button>
+                    <button id="save-resolve-btn" type="button" hidden>Save &amp; mark resolved</button>
+                </div>
+                <p class="save-status"></p>
+            </details>
+
             <div class="roster-panel">
                 <h2>Thesis List</h2>
+                <p class="note-legend"></p>
                 <div class="button_table">
                     </div>
             </div>
@@ -89,7 +113,7 @@
 
             $.ajax({
                 url: 'data/data_thesis.csv', // Path to your CSV file
-                dataType: 'text',
+                dataType: 'text', cache: false, // always read the current file, not a cached copy
                 success: function(csvData) {
                     // Process the data once it's successfully loaded
                     parseCsvWithPlugin(csvData);
@@ -132,13 +156,16 @@
                     );
                     totalPokemon = totalPokemon+1;
                     $(".button_table").append('<button class="pokemon_button gen' + getPokemonGeneration(pokemon.ID) + '" id="' + pokemon.ID + '">'+ pokemon.ID +'</button>');
+                    updateNoteIndicator(pokemon);
 
 
                 }
 
             });
 
-            $(".total").html(totalPokemon + ' / ' + (totalPokemon/9).toFixed(2)  + ' sheets');
+            var THESIS_PER_SHEET = 30; // thesis cards are 63 x 15.7 mm, so 30 fit on a sheet (standard cards: 9)
+            $(".total").html(totalPokemon + ' / ' + (totalPokemon/THESIS_PER_SHEET).toFixed(2)  + ' sheets');
+            updateNoteLegend();
 
             $select.on("change", function() {
 
@@ -180,39 +207,220 @@
         }
 
         function loadPokemonData(index) {
-            var indexPokemon = index;
-            console.log(aPokemonData[indexPokemon]);
+            if (!aPokemonData[index]) return;
+            curIndex = index;
+            fillEditForm(aPokemonData[index]);
+            renderCard(aPokemonData[index]);
+        }
 
-            var ID = aPokemonData[indexPokemon].ID;
-            var name = aPokemonData[indexPokemon].Name;
-            var Description = aPokemonData[indexPokemon].Description;
-
-            $(".card_name").html(name);
-
-            var paddedID = String(ID).padStart(4, '0');
-
-
-            $(".gen_tag").html(getPokemonGeneration(ID) + ' - ' + getPokemonRegion(ID));
-
-            $(".ability_text").html(replaceTypeIcons(Description));
-
-            $(".index").html(paddedID + ' - ' + getPokemonRegion(ID));
-
-            getPokemonDimensions(ID).then(pokemon => {
-                if (pokemon) {
-                    console.log(`${pokemon.name.toUpperCase()} (#${pokemon.id}):`);
-                    console.log(`Height: ${pokemon.height.meters} m (${pokemon.height.cm} cm)`);
-                    console.log(`Weight: ${pokemon.weight.kg} kg`);
-
-                    $(".height").html(pokemon.height.meters + " m");
-                    $(".weight").html(pokemon.weight.kg + " kg");
-                }
-            });
-
+        function renderCard(p) {
+            $(".card_name").html(p.Name);
+            $(".ability_text").html(replaceTypeIcons(p.Description || ""));
             $(".card_content").css("background-color", "black");
+            $(".nbSerie").html(String(curIndex + 1).padStart(3, '0'));
+        }
 
-            $(".nbSerie").html(String(index+1).padStart(3, '0'));
-            
+        // ===== Thesis editor =====
+        var curIndex = 0;
+        var CSV_FILE = "data_thesis.csv";
+        var FORM_FIELDS = { "Name": "#edit-name", "Description": "#edit-description", "ICON": "#edit-icon" };
+        var TYPE_CODES = { "Normal": "NOR", "Fire": "FIR", "Water": "WAT", "Electric": "ELE", "Grass": "GRA", "Ice": "ICE",
+                           "Fighting": "FIG", "Poison": "POS", "Ground": "GRD", "Flying": "FLY", "Psychic": "PSY", "Bug": "BUG",
+                           "Rock": "ROC", "Ghost": "GHO", "Dragon": "DRG", "Dark": "DRK", "Steel": "STE", "Fairy": "FAR" };
+
+        $(function() {
+            $.each(TYPE_CODES, function(name, code) { $("#edit-icon").append($("<option>", { value: "{" + code + "}", text: name + " {" + code + "}" })); });
+            $(".edit-panel").on("input change", "input, select, textarea", function() {
+                $("#description-length").text($("#edit-description").val().length);
+                $(".save-status").text("Unsaved changes").attr("class", "save-status dirty");
+                renderCard(readEditForm());
+            });
+            $("#revert-btn").on("click", function() { loadPokemonData(curIndex); });
+            $("#save-btn").on("click", function() { saveCurrentCard(false); });
+            $("#save-resolve-btn").on("click", function() { saveCurrentCard(true); });
+            $("#resolve-note-btn").on("click", resolveNote);
+            buildSymbolReference();
+            // Remember whether the Edit panel is open or collapsed
+            var editPanel = document.querySelector(".edit-panel");
+            if (localStorage.getItem("thesisEditPanelOpen") === "0") editPanel.open = false;
+            editPanel.addEventListener("toggle", function() { localStorage.setItem("thesisEditPanelOpen", editPanel.open ? "1" : "0"); });
+        });
+
+        function fillEditForm(p) {
+            $.each(FORM_FIELDS, function(col, sel) {
+                var v = p[col] || "";
+                var $el = $(sel);
+                // keep unknown values visible instead of silently dropping them
+                if ($el.is("select") && v && !$el.find('option[value="' + v + '"]').length) {
+                    $el.append($("<option>", { value: v, text: v + " (?)" }));
+                }
+                $el.val(v);
+            });
+            $("#description-length").text((p.Description || "").length);
+            $(".save-status").text("").attr("class", "save-status");
+            showBalanceNote(p);
+        }
+
+        function readEditForm() {
+            var p = $.extend({}, aPokemonData[curIndex]);
+            $.each(FORM_FIELDS, function(col, sel) {
+                p[col] = String($(sel).val() || "").replace(/\r?\n/g, " ").trim();
+            });
+            return p;
+        }
+
+        function csvField(v) {
+            v = String(v == null ? "" : v);
+            return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+        }
+
+        // Same store as index_r.html, so the Generator folder is only picked once for both pages
+        function idb(mode, fn) {
+            return new Promise(function(res, rej) {
+                var o = indexedDB.open("pokemonCardEditor", 1);
+                o.onupgradeneeded = function() { o.result.createObjectStore("h"); };
+                o.onsuccess = function() {
+                    var tx = o.result.transaction("h", mode); var q = fn(tx.objectStore("h"));
+                    tx.oncomplete = function() { res(q && q.result); }; tx.onerror = rej;
+                };
+                o.onerror = rej;
+            });
+        }
+
+        // Returns a writable handle to data/data_thesis.csv (asks for the Generator folder once, then remembers it)
+        async function getCsvHandle() {
+            if (!window.showDirectoryPicker) throw new Error("This browser cannot write files. Use Chrome or Edge.");
+            var dir = await idb("readonly", function(s) { return s.get("dir"); });
+            if (dir && (await dir.requestPermission({ mode: "readwrite" })) === "granted") {
+                try { return await (await dir.getDirectoryHandle("data")).getFileHandle(CSV_FILE); } catch (e) {}
+            }
+            alert("Pick the Generator folder (the one containing index_thesis.html) so the page can save data/" + CSV_FILE + ".");
+            dir = await window.showDirectoryPicker({ mode: "readwrite" });
+            var fh;
+            try { fh = await (await dir.getDirectoryHandle("data")).getFileHandle(CSV_FILE); }
+            catch (e) { throw new Error("That folder has no data/" + CSV_FILE + ". Pick the Generator folder itself."); }
+            await idb("readwrite", function(s) { return s.put(dir, "dir"); });
+            return fh;
+        }
+
+        // Re-reads the CSV from disk and changes only the given columns of one row, so edits made elsewhere are kept
+        async function writeCsvRow(id, changes) {
+            var fh = await getCsvHandle();
+            var text = await (await fh.getFile()).text();
+            var nl = text.indexOf("\r\n") >= 0 ? "\r\n" : "\n";
+            var rows = $.csv.toArrays(text);
+            while (rows.length && rows[rows.length - 1].join("") === "" && rows[rows.length - 1].length <= 1) rows.pop();
+            var header = rows[0];
+            var idCol = header.indexOf("ID");
+            var row = rows.find(function(r, i) { return i > 0 && r[idCol] === String(id); });
+            if (!row) throw new Error("Row with ID " + id + " not found in " + CSV_FILE + ".");
+            $.each(changes, function(col, val) {
+                var c = header.indexOf(col);
+                if (c >= 0) { while (row.length <= c) row.push(""); row[c] = val; }
+            });
+            var out = rows.map(function(r) { return r.map(csvField).join(","); }).join(nl) + nl;
+            var w = await fh.createWritable(); await w.write(out); await w.close();
+        }
+
+        // resolve = true also clears the balancing note in the same write ("Save & mark resolved")
+        async function saveCurrentCard(resolve) {
+            var p = readEditForm();
+            if (resolve) { p.Note = ""; p.Note_Priority = ""; }
+            if (!p.Name) { alert("Name cannot be empty."); return; }
+            $(".save-status").text("Saving…").attr("class", "save-status");
+            try {
+                var changes = {};
+                $.each(FORM_FIELDS, function(col) { changes[col] = p[col]; });
+                if (resolve) { changes.Note = ""; changes.Note_Priority = ""; }
+                await writeCsvRow(p.ID, changes);
+                aPokemonData[curIndex] = p;
+                $('#menu_pokemon option[value="' + p.ID + '"]').text("#" + String(p.ID).padStart(4, "0") + " " + p.Name);
+                renderCard(p);
+                updateNoteIndicator(p);
+                if (resolve) { updateNoteLegend(); markNoteResolved(); }
+                $(".save-status").text(resolve ? "Saved and note resolved ✓" : "Saved to " + CSV_FILE + " ✓").attr("class", "save-status ok");
+            } catch (e) {
+                if (e.name === "AbortError") { $(".save-status").text("Save cancelled").attr("class", "save-status dirty"); return; }
+                $(".save-status").text("Save failed: " + e.message).attr("class", "save-status error");
+            }
+        }
+
+        // ===== Balancing notes (CSV columns Note / Note_Priority: 1 important, 2 potential problem, 3 suggestion) =====
+        var NOTE_PRIORITIES = { "1": "Important", "2": "Potential problem", "3": "Suggestion" };
+
+        function notePriority(p) {
+            if (!p.Note || !p.Note.trim()) return null;
+            return NOTE_PRIORITIES[String(p.Note_Priority).trim()] ? String(p.Note_Priority).trim() : "none";
+        }
+
+        // Coloured dot in the corner of the roster button, with the note as a tooltip
+        function updateNoteIndicator(p) {
+            var $btn = $('.pokemon_button[id="' + p.ID + '"]');
+            var pr = notePriority(p);
+            $btn.find(".note_dot").remove();
+            $btn.attr("title", pr ? (NOTE_PRIORITIES[pr] ? NOTE_PRIORITIES[pr] + ": " : "") + p.Note : p.Name);
+            if (pr) $btn.append($("<span>", { "class": "note_dot note_p" + pr }));
+        }
+
+        function updateNoteLegend() {
+            var counts = { "1": 0, "2": 0, "3": 0 };
+            $.each(aPokemonData, function(i, p) { var pr = notePriority(p); if (counts[pr] != null) counts[pr]++; });
+            $(".note-legend").html($.map(NOTE_PRIORITIES, function(label, k) {
+                return '<span><span class="note_dot note_p' + k + '"></span>' + counts[k] + ' ' + label.toLowerCase() + '</span>';
+            }).join(""));
+        }
+
+        // Read-only note box at the top of the Edit panel (notes are written by the AI agent)
+        function showBalanceNote(p) {
+            var pr = notePriority(p);
+            var $box = $(".balance-note").attr("class", "balance-note").prop("hidden", !pr);
+            $("#save-resolve-btn").prop("hidden", !pr);
+            if (!pr) return;
+            $box.addClass("note_border_p" + pr);
+            $box.find(".note_dot").attr("class", "note_dot note_p" + pr);
+            $box.find(".balance-note-label").text(NOTE_PRIORITIES[pr] || "Note");
+            $box.find(".balance-note-text").text(p.Note);
+            $("#resolve-note-btn").prop("disabled", false).text("Mark resolved").show();
+        }
+
+        // Shows the note box as resolved and hides both resolve buttons
+        function markNoteResolved() {
+            $(".balance-note").attr("class", "balance-note resolved");
+            $(".balance-note .note_dot").attr("class", "note_dot note_resolved");
+            $(".balance-note-label").text("Resolved ✓");
+            $("#resolve-note-btn").hide();
+            $("#save-resolve-btn").prop("hidden", true);
+        }
+
+        // Clears Note and Note_Priority for this thesis in the CSV (other columns and unsaved edits are untouched)
+        async function resolveNote() {
+            var p = aPokemonData[curIndex];
+            var $btn = $("#resolve-note-btn").prop("disabled", true).text("Saving…");
+            try {
+                await writeCsvRow(p.ID, { "Note": "", "Note_Priority": "" });
+                p.Note = ""; p.Note_Priority = "";
+                updateNoteIndicator(p);
+                updateNoteLegend();
+                markNoteResolved();
+            } catch (e) {
+                $btn.prop("disabled", false).text("Mark resolved");
+                if (e.name !== "AbortError") alert("Could not resolve the note: " + e.message);
+            }
+        }
+
+        // Fills the "?" tooltip with every type code and the other symbols
+        function buildSymbolReference() {
+            var types = $.map(TYPE_CODES, function(code, name) {
+                return '<span class="ref-item"><img class="ref-icon" src="img/type/' + name.toLowerCase() + '.png"><code>{' + code + '}</code>' + name + '</span>';
+            }).join("");
+            $(".ref-tip-box").html(
+                '<span class="ref-title">Types</span><span class="ref-grid ref-types">' + types + '</span>' +
+                '<span class="ref-title">Other symbols</span><span class="ref-grid">' +
+                    '<span class="ref-item"><img class="ref-icon" src="img/type/all.png"><code>{ALL}</code>All types</span>' +
+                    '<span class="ref-item"><span class="ref-pip">2</span><code>{2}</code>Generic cost: any number</span>' +
+                    '<span class="ref-item"><span class="ref-pip">X</span><code>{X}</code>Variable amount</span>' +
+                    '<span class="ref-item"><span class="stat_modifier_yellow">+2</span>&nbsp;<span class="stat_modifier_red">-1</span>&nbsp;Bonus / malus, no braces needed</span>' +
+                '</span>');
         }
 
         function returnRarityColor(Rarity) {

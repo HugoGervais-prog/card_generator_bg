@@ -35,8 +35,10 @@ body {
 .app-container {
     display: flex;
     gap: 40px;
-    max-width: 1600px;
+    max-width: 2600px;
     width: 100%;
+    flex-wrap: wrap; /* the dashboard drops below when the window is too narrow */
+    align-items: flex-start;
 }
 
 /* --- Left Side: Card Preview --- */
@@ -50,7 +52,8 @@ body {
 
 /* --- Right Side: Sidebar Controls --- */
 .sidebar-section {
-    flex: 1;
+    flex: 1 1 420px;
+    min-width: 380px;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -215,16 +218,25 @@ h2 {
     color: white;
     text-shadow: 3px 3px black;
 }
-.generic_cost {
-    color: white;
+/* Area cost: filled from the CSV "Cost" column, e.g. {2}{WAT}, drawn left to right */
+.cost_row {
     position: absolute;
-    top: 20px;
-    left: 594px;
+    top: 60px;
+    right: 62px; /* right edge where the first cost icon used to end (700px + 48px) */
+    display: flex;
+    align-items: flex-start;
+    gap: 2px;
+}
+.cost_row .cost_type {
+    display: block;
+}
+.cost_generic {
+    min-width: 48px;
+    height: 48px;
+    line-height: 48px;
+    padding: 0 4px;
+    box-sizing: border-box;
     font-size: 40px;
-    width: 47px;
-    font-family: "Roboto Condensed", sans-serif;
-    font-optical-sizing: auto;
-    font-style: normal;
     font-weight: 600;
     color: white;
     text-shadow: 3px 3px black;
@@ -232,6 +244,7 @@ h2 {
     text-align: center;
     border-radius: 35px;
 }
+.cost_generic.unknown { color: #ff6b5a; font-size: 24px; }
 .card_portrait {
     width: 100%;
     height: 100%;
@@ -388,11 +401,6 @@ h2 {
     left: 647px;
 }
 
-.cost_icon {
-    position: absolute;
-    top: 60px;
-    left: 700px;
-}
 .a_icons {
     position: absolute;
     top: 675px;
@@ -657,7 +665,253 @@ h2 {
     color: #ffd700; /* Bright gold/yellow */
 }
 
+/* "Fire-type" words in ability text: colour set per type by colorTypeWords() in js/card-rules.js */
+.type_word {
+    font-weight: bold;
+    text-shadow:
+        1px  1px 0 #000,
+       -1px -1px 0 #000,
+        1px -1px 0 #000,
+       -1px  1px 0 #000;
+}
+
 /* Red styling for negative modifiers (-1, -X) */
 .stat_modifier_red {
     color: #ff4d4d; /* Vivid red */
 }
+
+/* --- Card Editor --- */
+.edit-panel {
+    background-color: #2b2b36;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    border: 1px solid #3f3f4e;
+}
+
+/* Collapsible header (the panel is a <details>; click the title to fold it) */
+.edit-panel > summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+}
+.edit-panel > summary::-webkit-details-marker { display: none; }
+.edit-panel > summary h2 { margin-bottom: 0; }
+.edit-panel > summary::after {
+    content: "\25BE"; /* ▾ */
+    font-size: 22px;
+    color: #a0a0b0;
+    transition: transform 0.2s;
+}
+.edit-panel:not([open]) > summary::after { transform: rotate(-90deg); }
+.edit-panel > summary:hover::after { color: #f5d02f; }
+.edit-panel[open] > summary { margin-bottom: 20px; }
+
+.edit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 16px;
+}
+
+.edit-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #a0a0b0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.edit-grid .full { grid-column: 1 / -1; }
+
+.edit-grid input, .edit-grid select, .edit-grid textarea {
+    font-family: inherit;
+    font-size: 16px;
+    padding: 10px 12px;
+    color: white;
+    background-color: #1e1e24;
+    border: 1px solid #4a4a5a;
+    border-radius: 8px;
+    outline: none;
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: normal;
+}
+
+.edit-grid input[readonly] { color: #888; }
+.edit-grid textarea { resize: vertical; min-height: 90px; line-height: 1.35; }
+.edit-grid input:focus, .edit-grid select:focus, .edit-grid textarea:focus { border-color: #f5d02f; }
+
+.field-hint {
+    font-size: 12px;
+    font-weight: normal;
+    color: #777;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.edit-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.edit-buttons button {
+    flex: 1;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+}
+
+#revert-btn { flex: 0 0 120px; background-color: #4a4a5a; }
+#revert-btn:hover { background-color: #5a5a6c; }
+#save-btn { background-color: #2ebf5c; }
+#save-btn:hover { background-color: #3cd56c; }
+
+.save-status { font-size: 14px; margin: 10px 0 0; min-height: 18px; color: #a0a0b0; }
+.save-status.dirty { color: #f5d02f; }
+.save-status.ok { color: #2ebf5c; }
+.save-status.error { color: #ff6b5a; }
+
+/* --- Balancing notes --- */
+.pokemon_button { position: relative; }
+.note_dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #1e1e24;
+    box-sizing: content-box;
+    background-color: #888; /* note without a valid priority */
+}
+.pokemon_button .note_dot {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+}
+.note_p1 { background-color: #ff3b30; } /* 1 - Important */
+.note_p2 { background-color: #f5d02f; } /* 2 - Potential problem */
+.note_p3 { background-color: #3b8bff; } /* 3 - Suggestion */
+
+.note-legend {
+    display: flex;
+    gap: 16px;
+    margin: -10px 0 15px;
+    font-size: 13px;
+    color: #a0a0b0;
+}
+.note-legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.note-legend .note_dot { width: 10px; height: 10px; border-width: 1px; }
+
+/* Read-only balancing note in the Edit Card panel */
+.balance-note {
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background-color: #1e1e24;
+    border-left: 5px solid #888;
+}
+.balance-note[hidden] { display: none; }
+.balance-note.note_border_p1 { border-left-color: #ff3b30; }
+.balance-note.note_border_p2 { border-left-color: #f5d02f; }
+.balance-note.note_border_p3 { border-left-color: #3b8bff; }
+.balance-note.resolved { border-left-color: #2ebf5c; opacity: 0.75; }
+.balance-note.resolved .balance-note-text { text-decoration: line-through; }
+.balance-note-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #a0a0b0;
+}
+.note_resolved { background-color: #2ebf5c; }
+.balance-note-text { margin: 8px 0 10px; font-size: 15px; line-height: 1.35; }
+#resolve-note-btn {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+    background-color: #4a4a5a;
+}
+#resolve-note-btn:hover { background-color: #2ebf5c; }
+#resolve-note-btn:disabled { opacity: 0.6; cursor: default; }
+
+/* --- Symbol reference tooltip ("?" next to Area cost / Ability effect) --- */
+.label-row { display: flex; align-items: center; gap: 6px; }
+.ref-tip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #4a4a5a;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: help;
+    outline: none;
+}
+.ref-tip:hover, .ref-tip:focus { background-color: #f5d02f; color: #1e1e24; }
+.ref-tip-box {
+    display: none;
+    position: absolute;
+    top: 22px;
+    left: -12px;
+    z-index: 50;
+    width: 400px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background-color: #111116;
+    border: 1px solid #4a4a5a;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.5);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: normal;
+    text-transform: none;
+    letter-spacing: normal;
+    line-height: 1.3;
+    cursor: default;
+}
+.ref-tip.align-right .ref-tip-box { left: auto; right: -12px; }
+.ref-tip:hover .ref-tip-box, .ref-tip:focus .ref-tip-box, .ref-tip-box:hover { display: block; }
+.ref-title {
+    display: block;
+    margin: 10px 0 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #a0a0b0;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.ref-title:first-child { margin-top: 0; }
+.ref-grid { display: grid; grid-template-columns: 1fr; gap: 5px 10px; }
+.ref-grid.ref-types { grid-template-columns: repeat(3, 1fr); }
+.ref-item { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.ref-item code { font-family: Consolas, monospace; font-size: 12px; color: #f5d02f; }
+.ref-icon { width: 20px; height: 20px; flex: none; }
+.ref-pip { min-width: 20px; height: 20px; line-height: 20px; font-size: 13px; text-shadow: none; padding: 0 3px; flex: none; }
+.ref-foot { display: block; margin-top: 10px; font-size: 12px; color: #a0a0b0; }
+
+/* "Save & mark resolved": only shown when the card has a balancing note */
+#save-resolve-btn { background-color: #2a7fd4; }
+#save-resolve-btn:hover { background-color: #3b8bff; }
+#save-resolve-btn[hidden] { display: none; }

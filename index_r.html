@@ -13,12 +13,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-    <link href="css/style_r.css" rel="stylesheet">
+    <link href="css/style_r.css?v=2" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
 
     <script src="https://code.jquery.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="js/jquery-google-sheet-to-json.js"></script>
     <script src="js/jquery.csv.js"></script>
+    <script src="js/card-rules.js?v=4"></script>
+    <script src="js/dashboard.js?v=6"></script>
 </head>
 <body>
 
@@ -37,15 +40,8 @@
 
                 <p class="card_name">Bulbasaur</p>
 
-                <p class="generic_cost">2</p>
+                <div class="cost_row"></div>
 
-                <img class="type_icons cost_icon c1" src="img/type/grass.png">
-                <img class="type_icons cost_icon c2" style="left:650px;display:none;" src="img/type/grass.png">
-                <img class="type_icons cost_icon c3" style="left:600px;display:none;" src="img/type/grass.png">
-                <img class="type_icons cost_icon c4" style="left:550px;display:none;" src="img/type/grass.png">
-                <img class="type_icons cost_icon c5" style="left:500px;display:none;" src="img/type/grass.png">
-                <img class="type_icons cost_icon c6" style="left:450px;display:none;" src="img/type/grass.png">
-                
                 
                 <p class="ability_name">Overgrown</p>
                 <p class="ability_text">+1 for each fire pokémon in the same column as this pokémon, but -1 for each water pokémon in the same row.</p>
@@ -81,12 +77,53 @@
                 <p class="help-text">Make sure browser zoom is at 100% before downloading.</p>
             </div>
 
+            <details class="edit-panel" open>
+                <summary><h2>Edit Card</h2></summary>
+                <div class="balance-note" hidden>
+                    <div class="balance-note-head"><span class="note_dot"></span><span class="balance-note-label"></span></div>
+                    <p class="balance-note-text"></p>
+                    <button id="resolve-note-btn" type="button">Mark resolved</button>
+                </div>
+                <div class="edit-grid">
+                    <label>Name<input id="edit-name"></label>
+                    <label>Rarity
+                        <select id="edit-rarity">
+                            <option value="B">B - Basic</option>
+                            <option value="I">I - Intermediate</option>
+                            <option value="A">A - Advanced</option>
+                            <option value="E">E - Expert</option>
+                            <option value="M">M - Mythic</option>
+                            <option value="L">L - Legendary</option>
+                        </select>
+                    </label>
+                    <label>Type 1<select id="edit-type1" class="type-select"></select></label>
+                    <label>Type 2<select id="edit-type2" class="type-select"><option value="">(none)</option></select></label>
+                    <label>Points<input id="edit-points" type="number" min="0" step="1"></label>
+                    <label><span class="label-row">Area cost <span class="ref-tip align-right" tabindex="0" aria-label="Symbol reference">?<span class="ref-tip-box"></span></span></span><input id="edit-cost" placeholder="{2}{WAT}"></label>
+                    <span class="field-hint full">Changing Rarity or a type resets Points and Area cost to that rarity's defaults.</span>
+                    <label class="full">Ability name<input id="edit-ability-name"></label>
+                    <label class="full"><span class="label-row">Ability effect <span class="ref-tip" tabindex="0" aria-label="Symbol reference">?<span class="ref-tip-box"></span></span></span>
+                        <textarea id="edit-ability-effect" rows="4"></textarea>
+                        <span class="field-hint"><span id="effect-length">0</span> characters &middot; icons: {WAT} {FIR} {GRA}&hellip; &middot; pips: {2} {X}</span>
+                    </label>
+                </div>
+                <div class="edit-buttons">
+                    <button id="revert-btn" type="button">Revert</button>
+                    <button id="save-btn" type="button">Save to CSV</button>
+                    <button id="save-resolve-btn" type="button" hidden>Save &amp; mark resolved</button>
+                </div>
+                <p class="save-status"></p>
+            </details>
+
             <div class="roster-panel">
                 <h2>Pokémon Roster</h2>
+                <p class="note-legend"></p>
                 <div class="button_table">
                     </div>
             </div>
         </div>
+
+        <div class="dashboard-section"></div>
     </div>
 
     <script>
@@ -122,7 +159,7 @@
 
             $.ajax({
                 url: 'data/data_r.csv', // Path to your CSV file
-                dataType: 'text',
+                dataType: 'text', cache: false, // always read the current file, not a cached copy
                 success: function(csvData) {
                     // Process the data once it's successfully loaded
                     parseCsvWithPlugin(csvData);
@@ -165,6 +202,7 @@
                     );
                     totalPokemon = totalPokemon+1;
                     $(".button_table").append('<button class="pokemon_button gen' + getPokemonGeneration(pokemon.ID) + '" id="' + pokemon.ID + '"><img src="img/sprite/' + paddedID + ' ' + pokemon.Name + '.png"></button>');
+                    updateNoteIndicator(pokemon);
 
 
                 }
@@ -172,6 +210,8 @@
             });
 
             $(".total").html(totalPokemon + ' / ' + (totalPokemon/9).toFixed(2)  + ' sheets');
+            updateNoteLegend();
+            renderDashboard();
 
             $select.on("change", function() {
 
@@ -213,16 +253,45 @@
         }
 
         function loadPokemonData(index) {
-            var indexPokemon = index;
-            console.log(aPokemonData[indexPokemon]);
+            if (!aPokemonData[index]) return;
+            curIndex = index;
+            fillEditForm(aPokemonData[index]);
+            renderCard(aPokemonData[index]);
+        }
 
-            var ID = aPokemonData[indexPokemon].ID;
-            var name = aPokemonData[indexPokemon].Name;
-            var ability_r_name = aPokemonData[indexPokemon].Ability_R_Name;
-            var ability_r_effect = aPokemonData[indexPokemon].Ability_R_Effect;
-            var rarity = aPokemonData[indexPokemon].Rarity;
-            var type1 = aPokemonData[indexPokemon].Type1;
-            var type2 = aPokemonData[indexPokemon].Type2;      
+        // Sizes the ability box to its text. The box's bottom edge stays just above the points bar and it grows upward;
+        // the font only shrinks when the text would be taller than ABILITY_MAX_TEXT_H.
+        var ABILITY_BOX_BOTTOM = 894;   // bottom edge of the dark box (card pixels), just above the points bar
+        var ABILITY_TEXT_INSET = 6;     // space between the last line of text and the bottom of the box
+        var ABILITY_MAX_TEXT_H = 200;   // tallest text block before the font shrinks (4 lines at 36px)
+        var ABILITY_MIN_FONT = 32;      // never smaller, so printed cards stay readable; past that the box grows taller
+        var ABILITY_NAME_GAP = 54;      // from the top of the box to the top of the text (room for the ability name)
+        function layoutAbilityBox() {
+            var $name = $(".ability_name"), $text = $(".ability_text");
+            if (!$name.is(":visible")) return;
+            $name.css("margin", 0); // positions below are the visible edges, so drop the default <p> margins
+            $text.css({ margin: 0, height: "auto", top: "0px" });
+            var size = 36;
+            $text.css("font-size", size + "px");
+            while ($text[0].offsetHeight > ABILITY_MAX_TEXT_H && size > ABILITY_MIN_FONT) { size--; $text.css("font-size", size + "px"); }
+            var textTop = ABILITY_BOX_BOTTOM - ABILITY_TEXT_INSET - $text[0].offsetHeight;
+            var nameTop = textTop - ABILITY_NAME_GAP;
+            $text.css("top", textTop + "px");
+            $name.css({ top: nameTop + "px", height: (ABILITY_BOX_BOTTOM - nameTop - 20) + "px" }); // 20 = the box's padding
+            $(".portrait_box").css("top", size < 36 ? "100px" : "150px");
+        }
+        // Re-measure once the card font has loaded and whenever an icon inside the text finishes loading
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutAbilityBox);
+        $(function() { $(".ability_text").each(function() { this.addEventListener("load", layoutAbilityBox, true); }); });
+
+        function renderCard(p) {
+            var ID = p.ID;
+            var name = p.Name;
+            var ability_r_name = p.Ability_R_Name || "";
+            var ability_r_effect = p.Ability_R_Effect || "";
+            var rarity = p.Rarity;
+            var type1 = p.Type1;
+            var type2 = p.Type2;      
 
             if (rarity == "L") {
                 $(".card_frame").attr("src", "img/base_frame/" + rarity + "_simple.png");
@@ -245,40 +314,9 @@
                 $(".ability_text").show();
 
                 $(".ability_name").html(ability_r_name);
-                $(".ability_text").html(replaceTypeIcons(ability_r_effect));
+                $(".ability_text").html(colorTypeWords(replaceTypeIcons(ability_r_effect)));
 
-                $(".ability_text").css("font-size", "36px");
-                $(".portrait_box").css("top", "150px");
-
-                if(ability_r_effect.length > 220){
-                    $(".ability_name").css("height", "212px");
-                    $(".ability_name").css("top", "619px");
-                    $(".ability_text").css("top", "684px");0
-                    $(".ability_text").css("font-size", "29px");
-                    $(".portrait_box").css("top", "100px");
-                }else if(ability_r_effect.length > 155){
-                    $(".ability_name").css("height", "212px");
-                    $(".ability_name").css("top", "619px");
-                    $(".ability_text").css("top", "684px");0
-                    $(".ability_text").css("font-size", "31px");
-                    $(".portrait_box").css("top", "100px");
-                }else if(ability_r_effect.length > 135){
-                    $(".ability_name").css("height", "237px");
-                    $(".ability_name").css("top", "593px");
-                    $(".ability_text").css("top", "655px");
-                }else if(ability_r_effect.length > 90){
-                    $(".ability_name").css("height", "193px");
-                    $(".ability_name").css("top", "640px");
-                    $(".ability_text").css("top", "700px");
-                }else if(ability_r_effect.length > 50){
-                    $(".ability_name").css("height", "140px");
-                    $(".ability_name").css("top", "693px");
-                    $(".ability_text").css("top", "750px");
-                }else{
-                    $(".ability_name").css("height", "100px");
-                    $(".ability_name").css("top", "730px");
-                    $(".ability_text").css("top", "790px");
-                }
+                layoutAbilityBox();
             }else{
                 $(".ability_name").hide();
                 $(".ability_text").hide();
@@ -286,7 +324,8 @@
 
             $(".index").html(paddedID + ' - ' + getPokemonRegion(ID));
 
-            getPokemonDimensions(ID).then(pokemon => {
+            if (ID === lastDimsId) { /* already fetched for this Pokémon */ } else
+            getPokemonDimensions(lastDimsId = ID).then(pokemon => {
                 if (pokemon) {
                     console.log(`${pokemon.name.toUpperCase()} (#${pokemon.id}):`);
                     console.log(`Height: ${pokemon.height.meters} m (${pokemon.height.cm} cm)`);
@@ -312,7 +351,6 @@
 
             $(".card_content").css("background-color", "black");
             
-            var nbType = 1;
             if (type2) {
                 $(".p2_type").show();
                 $(".p2_type").attr("src", "img/type/" + type2 + ".png");
@@ -327,8 +365,6 @@
                 $(".c2_type").show();
                 $(".c2_type").attr("src", "img/type/" + type2 + ".png");
 
-                $(".generic_cost").css("left", "594px");
-                nbType++;
             }else{
                 $(".p2_type").hide();
                 $(".gradient_box").css("background", 
@@ -340,144 +376,249 @@
                 );
 
                 $(".c2_type").hide();
-                $(".generic_cost").css("left", "648px");
             }
-            $(".generic_cost").show();
+            renderCost(p.Cost || defaultCost(p.Rarity, type1, type2));
+            $(".capture_rate").html(p.Points !== undefined && p.Points !== "" ? p.Points : defaultPoints(rarity));
+        }
 
-            var nbPip = 1;
-            if (type2) {
-                switch (rarity) {
-                    case "B": // Cost 2
-                        nbPip = 2;
-                        $(".c1").attr("src", "img/type/" + type1 + ".png");
-                        $(".c2").attr("src", "img/type/" + type2 + ".png");
-                        break;
-                    case "I": // Cost 3
-                        nbPip = 2;
-                        $(".c1").attr("src", "img/type/" + type1 + ".png");
-                        $(".c2").attr("src", "img/type/" + type2 + ".png");
-                        break;
-                    case "A": // Cost 5
-                        nbPip = 3;
-                        $(".c1").attr("src", "img/type/" + type1 + ".png");
-                        $(".c2").attr("src", "img/type/" + type1 + ".png");
-                        $(".c3").attr("src", "img/type/" + type2 + ".png");
-                        break;
-                    case "E": // Cost 7
-                        nbPip = 4;
-                        $(".c1").attr("src", "img/type/" + type1 + ".png");
-                        $(".c2").attr("src", "img/type/" + type1 + ".png");
-                        $(".c3").attr("src", "img/type/" + type2 + ".png");
-                        $(".c4").attr("src", "img/type/" + type2 + ".png");
-                        break;
-                    case "M": // Cost 9
-                        nbPip = 5;
-                        $(".c1").attr("src", "img/type/" + type1 + ".png");
-                        $(".c2").attr("src", "img/type/" + type1 + ".png");
-                        $(".c3").attr("src", "img/type/" + type1 + ".png");
-                        $(".c4").attr("src", "img/type/" + type2 + ".png");
-                        $(".c5").attr("src", "img/type/" + type2 + ".png");
-                        break;
-                    case "L": // Cost 12
-                        nbPip = 6;
-                        $(".c1").attr("src", "img/type/" + type1 + ".png");
-                        $(".c2").attr("src", "img/type/" + type1 + ".png");
-                        $(".c3").attr("src", "img/type/" + type1 + ".png");
-                        $(".c4").attr("src", "img/type/" + type2 + ".png");
-                        $(".c5").attr("src", "img/type/" + type2 + ".png");
-                        $(".c6").attr("src", "img/type/" + type2 + ".png")
-                        break;
-                    default:
-                        // Code runs if no cases match
-                }
-            }else{
-                switch (rarity) {
-                    case "B": // Cost 2
-                        nbPip = 1;
-                        $(".c1").attr("src", "img/type/" + type1 + ".png");
-                        break;
-                    case "I": // Cost 3
-                        nbPip = 1;
-                        $(".c1").attr("src", "img/type/" + type1 + ".png");
-                        break;
-                    case "A": // Cost 5
-                        nbPip = 2;
-                        $(".c1").attr("src", "img/type/" + type1 + ".png");
-                        $(".c2").attr("src", "img/type/" + type1 + ".png");
-                        break;
-                    case "E": // Cost 7
-                        nbPip = 3;
-                        $(".c1").attr("src", "img/type/" + type1 + ".png");
-                        $(".c2").attr("src", "img/type/" + type1 + ".png");
-                        $(".c3").attr("src", "img/type/" + type1 + ".png");
-                        break;
-                    case "M": // Cost 9
-                        nbPip = 4;
-                        $(".c1").attr("src", "img/type/" + type1 + ".png");
-                        $(".c2").attr("src", "img/type/" + type1 + ".png");
-                        $(".c3").attr("src", "img/type/" + type1 + ".png");
-                        $(".c4").attr("src", "img/type/" + type1 + ".png");
-                        break;
-                    case "L": // Cost 12
-                        nbPip = 5;
-                        $(".c1").attr("src", "img/type/" + type1 + ".png");
-                        $(".c2").attr("src", "img/type/" + type1 + ".png");
-                        $(".c3").attr("src", "img/type/" + type1 + ".png");
-                        $(".c4").attr("src", "img/type/" + type1 + ".png");
-                        $(".c5").attr("src", "img/type/" + type1 + ".png");
-                        break;
-                    default:
-                        // Code runs if no cases match
-                }
+        // ===== Card editor =====
+        var curIndex = 0;
+        var lastDimsId = null;
+        var FORM_FIELDS = {
+            "Name": "#edit-name", "Rarity": "#edit-rarity", "Type1": "#edit-type1", "Type2": "#edit-type2",
+            "Ability_R_Name": "#edit-ability-name", "Ability_R_Effect": "#edit-ability-effect",
+            "Points": "#edit-points", "Cost": "#edit-cost"
+        };
+
+        // ===== Balancing notes (CSV columns Note / Note_Priority: 1 important, 2 potential problem, 3 suggestion) =====
+        var NOTE_PRIORITIES = { "1": "Important", "2": "Potential problem", "3": "Suggestion" };
+
+        function notePriority(p) {
+            if (!p.Note || !p.Note.trim()) return null;
+            return NOTE_PRIORITIES[String(p.Note_Priority).trim()] ? String(p.Note_Priority).trim() : "none";
+        }
+
+        // Coloured dot in the corner of the roster button, with the note as a tooltip
+        function updateNoteIndicator(p) {
+            var $btn = $('.pokemon_button[id="' + p.ID + '"]');
+            var pr = notePriority(p);
+            $btn.find(".note_dot").remove();
+            $btn.attr("title", pr ? (NOTE_PRIORITIES[pr] ? NOTE_PRIORITIES[pr] + ": " : "") + p.Note : p.Name);
+            if (pr) $btn.append($("<span>", { "class": "note_dot note_p" + pr }));
+        }
+
+        // Read-only note box at the top of the Edit Card panel (notes are written by the AI agent)
+        function showBalanceNote(p) {
+            var pr = notePriority(p);
+            var $box = $(".balance-note").attr("class", "balance-note").prop("hidden", !pr);
+            $("#save-resolve-btn").prop("hidden", !pr);
+            if (!pr) return;
+            $box.addClass("note_border_p" + pr);
+            $box.find(".note_dot").attr("class", "note_dot note_p" + pr);
+            $box.find(".balance-note-label").text(NOTE_PRIORITIES[pr] || "Note");
+            $box.find(".balance-note-text").text(p.Note);
+            $("#resolve-note-btn").prop("disabled", false).text("Mark resolved").show();
+        }
+
+        // Shows the note box as resolved and hides both resolve buttons
+        function markNoteResolved() {
+            $(".balance-note").attr("class", "balance-note resolved");
+            $(".balance-note .note_dot").attr("class", "note_dot note_resolved");
+            $(".balance-note-label").text("Resolved ✓");
+            $("#resolve-note-btn").hide();
+            $("#save-resolve-btn").prop("hidden", true);
+        }
+
+        // Clears Note and Note_Priority for this Pokémon in data_r.csv (other columns and unsaved edits are untouched)
+        async function resolveNote() {
+            var p = aPokemonData[curIndex];
+            var $btn = $("#resolve-note-btn").prop("disabled", true).text("Saving…");
+            try {
+                await writeCsvRow(p.ID, { "Note": "", "Note_Priority": "" });
+                p.Note = ""; p.Note_Priority = "";
+                updateNoteIndicator(p);
+                updateNoteLegend();
+                renderDashboard();
+                markNoteResolved();
+            } catch (e) {
+                $btn.prop("disabled", false).text("Mark resolved");
+                if (e.name !== "AbortError") alert("Could not resolve the note: " + e.message);
             }
+        }
 
-            $('img.cost_icon').show();
+        function updateNoteLegend() {
+            var counts = { "1": 0, "2": 0, "3": 0 };
+            $.each(aPokemonData, function(i, p) { var pr = notePriority(p); if (counts[pr] != null) counts[pr]++; });
+            $(".note-legend").html($.map(NOTE_PRIORITIES, function(label, k) {
+                return '<span><span class="note_dot note_p' + k + '"></span>' + counts[k] + ' ' + label.toLowerCase() + '</span>';
+            }).join(""));
+        }
 
-            $('img.cost_icon').filter(function() {
-                // Extract the class starting with "c" followed by numbers
-                let match = this.className.match(/\bc(\d+)\b/);
-                if (match) {
-                    let classNum = parseInt(match[1], 10);
-                    return classNum > nbPip;
+        // ===== Points & area cost (CSV columns Points / Cost; defaults and type codes live in js/card-rules.js) =====
+
+        // Fills the "?" tooltips in the edit form with every type code and the generic cost symbols
+        function buildSymbolReference() {
+            var types = $.map(TYPE_CODES, function(code, name) {
+                return '<span class="ref-item"><img class="ref-icon" src="img/type/' + name.toLowerCase() + '.png"><code>{' + code + '}</code>' + name + '</span>';
+            }).join("");
+            var html =
+                '<span class="ref-title">Types</span><span class="ref-grid ref-types">' + types + '</span>' +
+                '<span class="ref-title">Generic cost</span><span class="ref-grid">' +
+                    '<span class="ref-item"><span class="cost_generic ref-pip">2</span><code>{2}</code>Any number: pay that much of any type</span>' +
+                    '<span class="ref-item"><span class="cost_generic ref-pip">X</span><code>{X}</code>Variable amount</span>' +
+                '</span>' +
+                '<span class="ref-title">Ability text only</span><span class="ref-grid">' +
+                    '<span class="ref-item"><img class="ref-icon" src="img/type/all.png"><code>{ALL}</code>All types</span>' +
+                    '<span class="ref-item"><span class="stat_modifier_yellow">+2</span>&nbsp;<span class="stat_modifier_red">-1</span>&nbsp;Bonus / malus, no braces needed</span>' +
+                '</span>' +
+                '<span class="ref-foot">Example area cost: {2}{WAT}{WAT}</span>';
+            $(".ref-tip-box").html(html);
+        }
+
+        // Draws "{2}{WAT}{FIR}" left to right, right-aligned in the top-right corner of the card
+        function renderCost(cost) {
+            var codeToFile = {};
+            $.each(TYPE_CODES, function(t, c) { codeToFile[c] = t.toLowerCase(); });
+            var $row = $(".cost_row").empty();
+            (String(cost).match(/\{[^}]*\}/g) || []).forEach(function(tok) {
+                var code = tok.slice(1, -1).trim().toUpperCase();
+                if (codeToFile[code]) {
+                    $row.append($("<img>", { "class": "type_icons cost_type", src: "img/type/" + codeToFile[code] + ".png" }));
+                } else {
+                    $row.append($("<span>", { "class": "cost_generic" + (/^(\d+|X)$/.test(code) ? "" : " unknown"), text: code }));
                 }
-                return false;
-            }).hide();
+            });
+        }
 
-            $(".generic_cost").css("left", 700-(nbPip*50) + "px");
+        $(function() {
+            $.each(TYPES, function(i, t) { $(".type-select").append($("<option>", { value: t, text: t })); });
+            // Runs before the panel-wide handler below, so the preview shows the new defaults
+            $("#edit-rarity, #edit-type1, #edit-type2").on("change", function() {
+                var r = $("#edit-rarity").val(), t1 = $("#edit-type1").val(), t2 = $("#edit-type2").val();
+                $("#edit-points").val(defaultPoints(r));
+                $("#edit-cost").val(defaultCost(r, t1, t2));
+            });
+            $(".edit-panel").on("input change", "input, select, textarea", function() {
+                $("#effect-length").text($("#edit-ability-effect").val().length);
+                $(".save-status").text("Unsaved changes").attr("class", "save-status dirty");
+                renderCard(readEditForm());
+            });
+            $("#revert-btn").on("click", function() { loadPokemonData(curIndex); });
+            $("#save-btn").on("click", function() { saveCurrentCard(false); });
+            $("#save-resolve-btn").on("click", function() { saveCurrentCard(true); });
+            $("#resolve-note-btn").on("click", resolveNote);
+            buildSymbolReference();
+            // Remember whether the Edit Card panel is open or collapsed
+            var editPanel = document.querySelector(".edit-panel");
+            if (localStorage.getItem("editPanelOpen") === "0") editPanel.open = false;
+            editPanel.addEventListener("toggle", function() { localStorage.setItem("editPanelOpen", editPanel.open ? "1" : "0"); });
+        });
 
-            switch (rarity) {
-                case "B": // Cost 2
-                    if(nbType > 1){
-                        $(".generic_cost").hide();
-                    }else{
-                        $(".generic_cost").show();
-                    }
-                    $(".generic_cost").html("1");
+        function fillEditForm(p) {
+            $.each(FORM_FIELDS, function(col, sel) {
+                var v = p[col] || "";
+                var $el = $(sel);
+                // keep unknown values (e.g. a misspelled type) visible instead of silently dropping them
+                if ($el.is("select") && v && !$el.find('option[value="' + v + '"]').length) {
+                    $el.append($("<option>", { value: v, text: v + " (?)" }));
+                }
+                $el.val(v);
+            });
+            $("#effect-length").text((p.Ability_R_Effect || "").length);
+            $(".save-status").text("").attr("class", "save-status");
+            showBalanceNote(p);
+        }
 
-                    $(".capture_rate").html(1);
-                    break;
-                case "I": // Cost 3
-                    $(".generic_cost").html(3-nbPip);
-                    $(".capture_rate").html(3);
-                    break;
-                case "A": // Cost 5
-                    $(".generic_cost").html(5-nbPip);
-                    $(".capture_rate").html(6);
-                    break;
-                case "E": // Cost 7
-                    $(".generic_cost").html(7-nbPip);
-                    $(".capture_rate").html(9);
-                    break;
-                case "M": // Cost 9
-                    $(".generic_cost").html(9-nbPip);
-                    $(".capture_rate").html(12);
-                    break;
-                case "L": // Cost 12
-                    $(".generic_cost").html(12-nbPip);
-                    $(".capture_rate").html(15);
-                    break;
-                default:
-                    // Code runs if no cases match
+        function readEditForm() {
+            var p = $.extend({}, aPokemonData[curIndex]);
+            $.each(FORM_FIELDS, function(col, sel) {
+                p[col] = String($(sel).val() || "").replace(/\r?\n/g, " ").trim();
+            });
+            return p;
+        }
+
+        function csvField(v) {
+            v = String(v == null ? "" : v);
+            return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+        }
+
+        function idb(mode, fn) {
+            return new Promise(function(res, rej) {
+                var o = indexedDB.open("pokemonCardEditor", 1);
+                o.onupgradeneeded = function() { o.result.createObjectStore("h"); };
+                o.onsuccess = function() {
+                    var tx = o.result.transaction("h", mode); var q = fn(tx.objectStore("h"));
+                    tx.oncomplete = function() { res(q && q.result); }; tx.onerror = rej;
+                };
+                o.onerror = rej;
+            });
+        }
+
+        // Returns a writable handle to data/data_r.csv (asks for the Generator folder once, then remembers it)
+        async function getCsvHandle() {
+            if (!window.showDirectoryPicker) throw new Error("This browser cannot write files. Use Chrome or Edge.");
+            var dir = await idb("readonly", function(s) { return s.get("dir"); });
+            if (dir && (await dir.requestPermission({ mode: "readwrite" })) === "granted") {
+                try { return await (await dir.getDirectoryHandle("data")).getFileHandle("data_r.csv"); } catch (e) {}
+            }
+            alert("Pick the Generator folder (the one containing index_r.html) so the page can save data/data_r.csv.");
+            dir = await window.showDirectoryPicker({ mode: "readwrite" });
+            var fh;
+            try { fh = await (await dir.getDirectoryHandle("data")).getFileHandle("data_r.csv"); }
+            catch (e) { throw new Error("That folder has no data/data_r.csv. Pick the Generator folder itself."); }
+            await idb("readwrite", function(s) { return s.put(dir, "dir"); });
+            return fh;
+        }
+
+        // Re-reads data_r.csv from disk and changes only the given columns of one row, so edits made elsewhere are kept
+        async function writeCsvRow(id, changes) {
+            var fh = await getCsvHandle();
+            var text = await (await fh.getFile()).text();
+            var nl = text.indexOf("\r\n") >= 0 ? "\r\n" : "\n";
+            var rows = $.csv.toArrays(text);
+            while (rows.length && rows[rows.length - 1].join("") === "" && rows[rows.length - 1].length <= 1) rows.pop();
+            var header = rows[0];
+            var idCol = header.indexOf("ID");
+            var row = rows.find(function(r, i) { return i > 0 && r[idCol] === String(id); });
+            if (!row) throw new Error("Row with ID " + id + " not found in data_r.csv.");
+            $.each(changes, function(col, val) {
+                var c = header.indexOf(col);
+                if (c >= 0) { while (row.length <= c) row.push(""); row[c] = val; }
+            });
+            var out = rows.map(function(r) { return r.map(csvField).join(","); }).join(nl) + nl;
+            var w = await fh.createWritable(); await w.write(out); await w.close();
+        }
+
+        // resolve = true also clears the balancing note in the same write ("Save & mark resolved")
+        async function saveCurrentCard(resolve) {
+            var p = readEditForm();
+            if (resolve) { p.Note = ""; p.Note_Priority = ""; }
+            if (!p.Name) { alert("Name cannot be empty."); return; }
+            if (p.Type2 && p.Type2 === p.Type1) { alert("Type 2 cannot be the same as Type 1."); return; }
+            $(".save-status").text("Saving…").attr("class", "save-status");
+            try {
+                var changes = {};
+                $.each(FORM_FIELDS, function(col) { changes[col] = p[col]; });
+                if (resolve) { changes.Note = ""; changes.Note_Priority = ""; }
+                await writeCsvRow(p.ID, changes);
+
+                // Update the page without reloading
+                var oldName = aPokemonData[curIndex].Name;
+                aPokemonData[curIndex] = p;
+                var paddedID = String(p.ID).padStart(4, "0");
+                $('#menu_pokemon option[value="' + p.ID + '"]').text("#" + paddedID + " " + p.Name);
+                if (oldName !== p.Name) {
+                    $('.pokemon_button[id="' + p.ID + '"] img').attr("src", "img/sprite/" + paddedID + " " + p.Name + ".png");
+                }
+                renderCard(p);
+                updateNoteIndicator(p);
+                updateNoteLegend();
+                renderDashboard();
+                if (resolve) markNoteResolved();
+                $(".save-status").text(resolve ? "Saved and note resolved ✓" : "Saved to data_r.csv ✓").attr("class", "save-status ok");
+            } catch (e) {
+                if (e.name === "AbortError") { $(".save-status").text("Save cancelled").attr("class", "save-status dirty"); return; }
+                $(".save-status").text("Save failed: " + e.message).attr("class", "save-status error");
             }
         }
 

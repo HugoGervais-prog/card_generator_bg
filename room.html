@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MTG Room card generator</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=New+Rocker&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+    <link href="css/style_room.css?v=28" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="js/jquery.csv.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <div class="card-section">
+            <div class="card_content" id="capture">
+                <div class="card_inner">
+                    <p class="card_name">Room</p>
+                    <div class="portrait_box">
+                        
+                        <img class="card_portrait" src="">
+                    </div>
+                    <div class="effect_box"><p class="effect_text"></p></div>
+                </div>
+                <p class="index">001</p>
+            </div>
+            <div class="edit-form"><h2>Edit Room</h2>
+                <label for="edit-name">Name</label>
+                <input id="edit-name">
+                <label>Rules</label>
+                <textarea id="edit-effect"></textarea>
+                <button id="save-btn">Save</button>
+            </div>
+        </div>
+        <div class="sidebar-section">
+            <div class="control-panel">
+                <h2>Room Generator</h2>
+                <p class="total">0 rooms</p>
+                <div class="btn-row"><button id="download-btn">Download Image</button><button id="print-list-btn">Print Room List</button></div>
+            </div>
+            <div class="roster-panel">
+                <h2>Rooms</h2>
+                <div class="button_table_wrap">
+                    <div class="button_table"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+    var aRooms = [];
+    $(function() {
+        $("#download-btn").click(function() {
+            Promise.all($('#capture .mana-symbol').toArray().map(function(el) { return new Promise(function(res) { if (el.src.indexOf('data:') === 0) return res(); var im = new Image(); im.onload = function() { var c = document.createElement('canvas'); c.width = c.height = 128; c.getContext('2d').drawImage(im, 0, 0, 128, 128); el.src = c.toDataURL('image/png'); el.onload = res; }; im.onerror = res; im.src = el.src; }); })).then(function() { return new Promise(function(res) { var p = document.querySelector('#capture .card_portrait'); if (!p || !p.naturalWidth) return res(null); var c = document.createElement('canvas'); c.width = p.naturalWidth; c.height = p.naturalHeight; var x = c.getContext('2d'); x.filter = 'brightness(1.2)'; x.drawImage(p, 0, 0); res(c.toDataURL('image/jpeg', 0.95)); }); }).then(function(bright) { return html2canvas(document.getElementById('capture'), { useCORS: true, backgroundColor: null, onclone: function(doc) { var p = doc.querySelector('.card_portrait'); if (p && bright) { p.src = bright; p.style.filter = 'none'; } } }); }).then(function(canvas) {
+                var link = document.createElement('a');
+                link.download = $(".index").text() + '-' + $(".card_name").text() + '.png';
+                link.href = canvas.toDataURL("image/png");
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            });
+        });
+        $(".card_portrait").on("error", function() { $(this).hide(); }).on("load", function() { $(this).show(); });
+        $.ajax({ url: 'data/rooms.csv', dataType: 'text', success: function(csv) {
+            aRooms = $.csv.toObjects(csv).filter(function(r) { return r.Name && r.Name.trim() !== ""; });
+            var urlId = new URLSearchParams(location.search).get("id");
+            $.each(aRooms, function(i, r) {
+                $(".button_table").append('<button class="room_button" data-i="' + i + '" title="' + r.Name + '"><img src="img/rooms/' + r.Image + '"><span class="room_label">' + r.Name + '</span></button>');
+            });
+            $(".total").text(aRooms.length + " rooms / " + (aRooms.length / 12).toFixed(2) + " sheets");
+            $(".room_button").on("click", function() { select(parseInt($(this).data("i"), 10)); });
+            var start = 0;
+            if (urlId) { aRooms.forEach(function(r, i) { if (r.ID == urlId) start = i; }); }
+            select(start);
+            sizeRoomGridSoon();
+        }});
+        $(window).on("resize", sizeRoomGrid);
+    });
+    var ROOM_GRID_COLS = 12;
+    var ROOM_GRID_VIEW_ROWS = 8;
+    function roomGridGap(table) {
+        var gap = parseFloat(window.getComputedStyle(table).columnGap);
+        return isFinite(gap) ? gap : 6;
+    }
+    function roomTileSize(contentWidth, cols, gap) {
+        cols = cols || ROOM_GRID_COLS;
+        if (!isFinite(gap)) gap = 6;
+        return (contentWidth - (cols - 1) * gap) / cols;
+    }
+    function roomGridViewportHeight(tile, viewRows, gap) {
+        viewRows = viewRows || ROOM_GRID_VIEW_ROWS;
+        if (!isFinite(gap)) gap = 6;
+        return viewRows * tile + (viewRows - 1) * gap;
+    }
+    function roomGridContentWidth(wrap) {
+        var styles = window.getComputedStyle(wrap);
+        var pad = (parseFloat(styles.paddingLeft) || 0) + (parseFloat(styles.paddingRight) || 0);
+        return wrap.clientWidth - pad;
+    }
+    function sizeRoomGrid() {
+        var wrap = document.querySelector(".button_table_wrap");
+        var table = document.querySelector(".button_table");
+        if (!wrap || !table) return;
+        var gap = roomGridGap(table);
+        var width = roomGridContentWidth(wrap);
+        if (width <= 0) return;
+        var tile = roomTileSize(width, ROOM_GRID_COLS, gap);
+        if (tile <= 0) return;
+        var viewport = roomGridViewportHeight(tile, ROOM_GRID_VIEW_ROWS, gap);
+        var tilePx = tile + "px";
+        var heightPx = viewport + "px";
+        if (wrap.style.getPropertyValue("--room-tile-size") !== tilePx) {
+            wrap.style.setProperty("--room-tile-size", tilePx);
+        }
+        if (wrap.style.height !== heightPx) {
+            wrap.style.height = heightPx;
+        }
+        if (window.ResizeObserver && !wrap._roomGridRO) {
+            wrap._roomGridRO = new ResizeObserver(function() { sizeRoomGrid(); });
+            wrap._roomGridRO.observe(wrap);
+        }
+    }
+    function sizeRoomGridSoon() {
+        sizeRoomGrid();
+        requestAnimationFrame(function() { sizeRoomGrid(); });
+    }
+    function pad(id) { return String(id).padStart(3, '0'); }
+    function select(i) {
+        var r = aRooms[i]; if (!r) return; curIndex = i; $("#edit-name").val(r.Name); $("#edit-effect").val(r.Effect || "");
+        $(".room_button").removeClass("active").eq(i).addClass("active");
+        var url = new URL(location); url.searchParams.set("id", r.ID); history.replaceState({}, "", url);
+        $(".card_name").text(r.Name); var ns = 50; $(".card_name").css("font-size", ns + "px"); while ($(".card_name")[0].scrollWidth > $(".card_name")[0].clientWidth || $(".card_name").outerHeight() > 80) { if (ns <= 32) break; ns--; $(".card_name").css("font-size", ns + "px"); }
+        $(".index").text(pad(r.ID));
+        $(".effect_text").html(formatEffect(r.Effect || ""));
+        if (r.Image) { $(".card_portrait").attr("src", "img/rooms/" + r.Image); } else { $(".card_portrait").hide(); }
+        fitText();
+    }
+    function formatEffect(t) {
+        t = $("<div>").text(t).html();
+        return t.replace(/\{([^}]+)\}/g, function(m, s) { return '<img class="mana-symbol" src="img/symbols/' + s.replace('/', '') + '.svg" alt="' + m + '">'; });
+    }
+    function fitText() {
+        var $t = $(".effect_text"), size = 42;
+        $t.css("font-size", size + "px");
+        while ($t.outerHeight() > 400 && size > 36) { size--; $t.css("font-size", size + "px"); }
+    }
+    $(document).on("click", "#print-list-btn", function() {
+        function esc(s) { return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+        var rows = aRooms.map(function(r) {
+            return '<tr><td class="n">' + esc(r.ID) + '</td><td class="nm">' + esc(r.Name) + '</td><td>' + esc(r.Effect) + '</td></tr>';
+        }).join("");
+        var w = window.open("", "_blank");
+        w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Room List</title>' +
+            '<style>body{font-family:Arial,sans-serif;margin:20px;font-size:12pt;}h1{font-size:18pt;margin:0 0 10px;}' +
+            'table{width:100%;border-collapse:collapse;}th,td{border:1px solid #999;padding:6px 8px;vertical-align:top;text-align:left;}' +
+            'th{background:#eee;}td.n{width:40px;text-align:center;}td.nm{width:180px;font-weight:bold;}tr{page-break-inside:avoid;}' +
+            '@media print{body{margin:10mm;}}</style></head><body>' +
+            '<h1>Room List (' + aRooms.length + ' rooms)</h1>' +
+            '<table><thead><tr><th>#</th><th>Name</th><th>Effect</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+            '</bo'+'dy></ht'+'ml>');
+        w.document.close();
+        w.focus(); setTimeout(function(){ w.print(); }, 300);
+    });
+    var curIndex = 0;
+    function csvField(v) { v = String(v == null ? "" : v); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+    function toCsv() {
+        var lines = ["ID,Name,Image,Effect"];
+        aRooms.forEach(function(r) { lines.push([r.ID, r.Name, r.Image].map(csvField).join(",") + ',"' + String(r.Effect || "").replace(/"/g, '""') + '"'); });
+        return lines.join("\r\n") + "\r\n";
+    }
+    function idb(mode, fn) {
+        return new Promise(function(res, rej) {
+            var o = indexedDB.open("roomEditor", 1);
+            o.onupgradeneeded = function() { o.result.createObjectStore("h"); };
+            o.onsuccess = function() { var tx = o.result.transaction("h", mode); var q = fn(tx.objectStore("h")); tx.oncomplete = function() { res(q && q.result); }; tx.onerror = rej; };
+            o.onerror = rej;
+        });
+    }
+    async function getDir() {
+        var h = await idb("readonly", function(s) { return s.get("dir"); });
+        if (h && (await h.requestPermission({ mode: "readwrite" })) === "granted") return h;
+        alert("Pick the Generator folder (the one containing room.html) so the page can save data/rooms.csv.");
+        h = await window.showDirectoryPicker({ mode: "readwrite" });
+        await idb("readwrite", function(s) { return s.put(h, "dir"); });
+        return h;
+    }
+    $(document).on("click", "#save-btn", async function() {
+        var r = aRooms[curIndex]; if (!r) return;
+        r.Name = $("#edit-name").val().trim();
+        r.Effect = $("#edit-effect").val().trim().replace(/\r?\n/g, " ");
+        try {
+            var dir = await getDir(), fh;
+            try { fh = await (await dir.getDirectoryHandle("data")).getFileHandle("rooms.csv"); }
+            catch (e2) {
+                await idb("readwrite", function(s) { return s.delete("dir"); });
+                alert("That folder has no data/rooms.csv. Pick the Generator folder itself.");
+                dir = await window.showDirectoryPicker({ mode: "readwrite" });
+                fh = await (await dir.getDirectoryHandle("data")).getFileHandle("rooms.csv");
+                await idb("readwrite", function(s) { return s.put(dir, "dir"); });
+            }
+            var w = await fh.createWritable(); await w.write(toCsv()); await w.close();
+            location.reload();
+        } catch (e) { alert("Save failed: " + e.message); }
+    });</script>
+</body>
+</html>
+
+
+
+
+
+

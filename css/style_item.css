@@ -19,18 +19,169 @@
 	--fairy: #D685AD;
 }
 
+/* =========================================
+   1. APP LAYOUT & MODERN STYLING (same look as style_r.css)
+   ========================================= */
 body {
-    font-family: Sans-serif;
-    margin: 20px;
-    background-color: #333;
+    font-family: "Roboto Condensed", sans-serif;
+    margin: 0;
+    padding: 30px;
+    background-color: #1e1e24;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
 }
 
-header {
-    background-color: #333;
-    color: white;
-    padding: 10px;
+.app-container {
+    display: flex;
+    gap: 40px;
+    max-width: 2600px;
+    width: 100%;
+    flex-wrap: wrap; /* the dashboard drops below when the window is too narrow */
+    align-items: flex-start;
 }
+
+/* --- Left: card preview --- */
+.card-section {
+    flex: 0 0 810px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border-radius: 20px;
+    overflow: hidden;
+    background: #000;
+}
+
+/* --- Middle: controls and area list --- */
+.sidebar-section {
+    flex: 1 1 420px;
+    min-width: 380px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.control-panel, .roster-panel {
+    background-color: #2b2b36;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    border: 1px solid #3f3f4e;
+}
+
+h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #f5d02f;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+#menu_pokemon {
+    font-size: 16px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #4a4a5a;
+    background-color: #1e1e24;
+    color: white;
+    width: 60%;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.total {
+    font-size: 14px;
+    color: #a0a0b0;
+    margin: 0;
+}
+
+#download-btn {
+    width: 100%;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 15px;
+    background-color: #e3350d;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+#download-btn:hover { background-color: #ff471a; }
+#download-btn:active { transform: scale(0.98); }
+
+.help-text {
+    font-size: 12px;
+    color: #888;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 0;
+}
+
+/* --- Area grid --- */
+.button_table {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+    gap: 10px;
+    max-height: 760px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+.button_table::-webkit-scrollbar { width: 8px; }
+.button_table::-webkit-scrollbar-track { background: #1e1e24; border-radius: 4px; }
+.button_table::-webkit-scrollbar-thumb { background: #4a4a5a; border-radius: 4px; }
+.button_table::-webkit-scrollbar-thumb:hover { background: #f5d02f; }
+
+.pokemon_button {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    background-color: #3f3f4e;
+    transition: transform 0.2s, border-color 0.2s;
+}
+.pokemon_button:hover {
+    transform: translateY(-3px);
+    border-color: #ffffff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+.pokemon_button.active { border-color: #f5d02f; }
+.pokemon_button > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+/* the area's type icons along the bottom of its button */
+.area_types {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    padding: 3px 2px;
+    background: rgba(0, 0, 0, 0.6);
+}
+.pokemon_button .area_type_icon { display: block; width: 16px; height: 16px; }
+
+/* =========================================
+   2. CARD (positions are relative to the 810x1110 card)
+   ========================================= */
 .card_content{
+    position: relative;
     width: 810px;
     height: 1110px;
     background-image: url("../img/area/Pallet Town.jpg");
@@ -42,8 +193,8 @@ header {
 .card_name {
     color: white;
     position: absolute;
-    top: 876px;
-    left: 88px;
+    top: 856px;
+    left: 68px;
     font-size: 60px;
     text-align: left;
     font-family: "Roboto Condensed", sans-serif;
@@ -59,8 +210,8 @@ header {
 .mana_cost{
     color: white;
     position: absolute;
-    top: -49px;
-    left: 51px;
+    top: -69px;
+    left: 31px;
     height: 148px;
     font-size: 100px;
     text-align: left;
@@ -88,16 +239,16 @@ header {
 }
 .portrait_box {
     position: absolute;
-    top: 155px;
-    left: 170px;
+    top: 135px;
+    left: 150px;
     height: 512px;
     width: 512px;
 }
 .ability_text {
     color: white;
     position: absolute;
-    top: 640px;
-    left: 125px;
+    top: 620px;
+    left: 105px;
     font-size: 44px;
     width: 580px;
     height: 230px;
@@ -110,8 +261,8 @@ header {
 .index {
     color: white;
     position: absolute;
-    top: 932px;
-    left: 113px;
+    top: 912px;
+    left: 93px;
     font-size: 48px;
     width: 569px;
     height: 60px;
@@ -125,41 +276,15 @@ header {
 }
 .c_icons {
     position: absolute;
-    top: 911px;
-    left: 620px;
+    top: 891px;
+    left: 600px;
     width: 180px;
-}
-.total{
-    color: white;
-    margin-left: 5px;
-}
-.button_table {
-    float: left;
-    margin-left: 10px;
-    width: 56%; /*55% for actual size or 64*/
-    position: absolute;
-    left:830px;
-    top: 70px;
-    height: 1060px;
-}
-.pokemon_button {
-    float: left;
-    width: 75px;
-    height: 75px;
-    cursor: pointer;
-}
-.pokemon_button img{
-    float: left;
-    width: 75px;
-    height: 75px;
-    margin-left:-9px;
-    margin-top:-3px;
 }
 .copyright {
     color: white;
     position: absolute;
-    top: 1025px;
-    left: 75px;
+    top: 1005px;
+    left: 55px;
     font-size: 22px;
     width: 569px;
     height: 60px;
@@ -175,3 +300,237 @@ header {
     margin-top: 10px;
     margin-left: 10px;
 }
+
+/* area with no picture in img/area/ yet */
+.area_noart {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 0 4px 18px;
+    box-sizing: border-box;
+    font-size: 11px;
+    color: #a0a0b0;
+    text-align: center;
+    background: repeating-linear-gradient(45deg, #2b2b36, #2b2b36 6px, #34343f 6px, #34343f 12px);
+}
+
+/* =========================================
+   3. AREA EDITOR (shared editor styles from style_r.css)
+   ========================================= */
+/* --- Card Editor --- */
+.edit-panel {
+    background-color: #2b2b36;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    border: 1px solid #3f3f4e;
+}
+
+/* Collapsible header (the panel is a <details>; click the title to fold it) */
+.edit-panel > summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+}
+.edit-panel > summary::-webkit-details-marker { display: none; }
+.edit-panel > summary h2 { margin-bottom: 0; }
+.edit-panel > summary::after {
+    content: "\25BE"; /* ▾ */
+    font-size: 22px;
+    color: #a0a0b0;
+    transition: transform 0.2s;
+}
+.edit-panel:not([open]) > summary::after { transform: rotate(-90deg); }
+.edit-panel > summary:hover::after { color: #f5d02f; }
+.edit-panel[open] > summary { margin-bottom: 20px; }
+
+.edit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 16px;
+}
+
+.edit-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #a0a0b0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.edit-grid .full { grid-column: 1 / -1; }
+
+.edit-grid input, .edit-grid select, .edit-grid textarea {
+    font-family: inherit;
+    font-size: 16px;
+    padding: 10px 12px;
+    color: white;
+    background-color: #1e1e24;
+    border: 1px solid #4a4a5a;
+    border-radius: 8px;
+    outline: none;
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: normal;
+}
+
+.edit-grid input[readonly] { color: #888; }
+.edit-grid textarea { resize: vertical; min-height: 90px; line-height: 1.35; }
+.edit-grid input:focus, .edit-grid select:focus, .edit-grid textarea:focus { border-color: #f5d02f; }
+
+.field-hint {
+    font-size: 12px;
+    font-weight: normal;
+    color: #777;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.edit-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.edit-buttons button {
+    flex: 1;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+}
+
+#revert-btn { flex: 0 0 120px; background-color: #4a4a5a; }
+#revert-btn:hover { background-color: #5a5a6c; }
+#save-btn { background-color: #2ebf5c; }
+#save-btn:hover { background-color: #3cd56c; }
+
+.save-status { font-size: 14px; margin: 10px 0 0; min-height: 18px; color: #a0a0b0; }
+.save-status.dirty { color: #f5d02f; }
+.save-status.ok { color: #2ebf5c; }
+.save-status.error { color: #ff6b5a; }
+
+/* --- Symbol reference tooltip ("?" next to Area cost / Ability effect) --- */
+.label-row { display: flex; align-items: center; gap: 6px; }
+.ref-tip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #4a4a5a;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: help;
+    outline: none;
+}
+.ref-tip:hover, .ref-tip:focus { background-color: #f5d02f; color: #1e1e24; }
+.ref-tip-box {
+    display: none;
+    position: absolute;
+    top: 22px;
+    left: -12px;
+    z-index: 50;
+    width: 400px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background-color: #111116;
+    border: 1px solid #4a4a5a;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.5);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: normal;
+    text-transform: none;
+    letter-spacing: normal;
+    line-height: 1.3;
+    cursor: default;
+}
+.ref-tip.align-right .ref-tip-box { left: auto; right: -12px; }
+.ref-tip:hover .ref-tip-box, .ref-tip:focus .ref-tip-box, .ref-tip-box:hover { display: block; }
+.ref-title {
+    display: block;
+    margin: 10px 0 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #a0a0b0;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.ref-title:first-child { margin-top: 0; }
+.ref-grid { display: grid; grid-template-columns: 1fr; gap: 5px 10px; }
+.ref-grid.ref-types { grid-template-columns: repeat(3, 1fr); }
+.ref-item { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.ref-item code { font-family: Consolas, monospace; font-size: 12px; color: #f5d02f; }
+.ref-icon { width: 20px; height: 20px; flex: none; }
+
+.ref-foot { display: block; margin-top: 10px; font-size: 12px; color: #a0a0b0; }
+
+/* Image file row: the picture for an area is img/area/<Name>.jpg */
+.image-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background-color: #1e1e24;
+    border: 1px solid #4a4a5a;
+}
+.image-row-label { font-size: 13px; font-weight: 700; color: #a0a0b0; text-transform: uppercase; letter-spacing: 0.05em; }
+#image-name { font-family: Consolas, monospace; font-size: 13px; color: #f5d02f; word-break: break-all; }
+.image-status { font-size: 12px; }
+.image-status.ok { color: #2ebf5c; }
+.image-status.missing { color: #ff6b5a; }
+#copy-image-btn {
+    margin-left: auto;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+    background-color: #4a4a5a;
+}
+#copy-image-btn:hover { background-color: #5a5a6c; }
+#upload-image-btn {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+    background-color: #2a7fd4;
+}
+#upload-image-btn:hover { background-color: #3b8bff; }
+.image-drop-hint { flex-basis: 100%; font-size: 12px; color: #777; }
+.image-row.dragging { border: 1px dashed #f5d02f; background-color: #2b2b20; }
+#copy-image-btn.copied { background-color: #2ebf5c; }
+#mana-hint.warn { color: #f5d02f; }
+
+/* Third column on the area page: the dashboard chart with the Edit Area panel below it */
+.third-column {
+    flex: 1 1 520px;
+    min-width: 440px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.third-column .dashboard-section { flex: none; min-width: 0; }

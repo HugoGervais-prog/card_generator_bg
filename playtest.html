@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Room Playtest</title>
+  <link href="https://fonts.googleapis.com/css2?family=New+Rocker&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+  <link href="css/style_playtest.css?v=14" rel="stylesheet">
+</head>
+<body>
+  <div class="app">
+    <p id="banner" class="banner" role="status"></p>
+    <div class="layout">
+      <main class="board-wrap" id="board-wrap" tabindex="0">
+        <p id="status" class="status" hidden>Loading rooms…</p>
+        <div id="board-sizer" class="board-sizer">
+          <div id="board-frame" class="board-frame">
+            <div class="board-toolbar">
+              <div id="players" class="players" role="toolbar" aria-label="Select player"></div>
+              <div class="board-actions" role="group" aria-label="Board controls">
+                <div class="mode-toggle" role="radiogroup" aria-label="Board mode">
+                  <button type="button" id="mode-move" class="tool-btn mode-btn active" aria-pressed="true" title="Move" aria-label="Move"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v18M3 12h18M8 6l4-4 4 4M8 18l4 4 4-4M6 8l-4 4 4 4M18 8l4 4-4 4"/></svg></button>
+                  <button type="button" id="mode-inspect" class="tool-btn mode-btn" aria-pressed="false" title="Inspect" aria-label="Inspect"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15 15l6 6"/></svg></button>
+                </div>
+                <button type="button" id="undo-btn" class="tool-btn" title="Undo" aria-label="Undo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 5L5 8l4 3"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M5 8h7a5 5 0 1 1 0 10H8"/></svg></button>
+                <button type="button" id="home-btn" class="tool-btn" title="Return to start" aria-label="Return to start"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 11.5L12 4l8 7.5"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 10.5V20h4.5v-6h3v6H18V10.5"/></svg></button>
+                <button type="button" id="reset-btn" class="tool-btn primary" title="New game" aria-label="New game"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 5v14M5 12h14"/></svg></button>
+              </div>
+            </div>
+            <div id="grid" class="grid" role="grid" aria-label="Room map"></div>
+          </div>
+        </div>
+        <section class="occupant-panel" aria-label="Rooms each player is in">
+          <h2>Player rooms</h2>
+          <div id="occupants" class="occupants"></div>
+        </section>
+      </main>
+    </div>
+    <div class="aux-chrome" hidden>
+      <div class="zoom-row" hidden>
+        <span class="zoom-label">Zoom</span>
+        <button type="button" class="icon-btn" id="zoom-out" aria-label="Zoom out">−</button>
+        <span id="zoom-label" class="zoom-label">100%</span>
+        <button type="button" class="icon-btn" id="zoom-in" aria-label="Zoom in">+</button>
+      </div>
+      <p class="sidebar-link" hidden><a href="room.html">Room generator</a></p>
+      <section class="panel help" hidden>
+        <h2>How to playtest</h2>
+        <p class="help">Select a token (the P1–P6 buttons, the token itself, or keys 1–6). Move orthogonally with arrow keys, WASD, or by clicking an adjacent cell. A hidden cell reveals a random unused room and keeps it. Tokens may share a cell. The 9×9 map has a visible edge.</p>
+        <details>
+          <summary>A little more</summary>
+          <ol>
+            <li>All tokens begin in the Starting Hall at the center.</li>
+            <li>Use the move log to remember leaves and enters when resolving effects by hand.</li>
+            <li>If an effect sends a token back, use Return to start. Destroyed rooms and other card effects are not automated.</li>
+            <li>The board is saved in this browser until you start a new game.</li>
+          </ol>
+        </details>
+      </section>
+      <section class="panel" hidden>
+        <h2>Move log</h2>
+        <ol id="log" class="log"></ol>
+      </section>
+    </div>
+  </div>
+
+  <dialog id="new-game-dialog" class="new-game-dialog" aria-labelledby="new-game-title">
+    <form id="new-game-form">
+      <h2 id="new-game-title">Start a new game</h2>
+      <p class="new-game-copy">This will clear the current map, token positions, and log, then start a fresh delve.</p>
+      <fieldset class="player-count-fieldset">
+        <legend>How many players?</legend>
+        <div class="player-count-choices" role="radiogroup" aria-label="Number of players">
+          <label class="player-count-choice"><input type="radio" name="player-count" value="2"><span>2</span></label>
+          <label class="player-count-choice"><input type="radio" name="player-count" value="3"><span>3</span></label>
+          <label class="player-count-choice"><input type="radio" name="player-count" value="4" checked><span>4</span></label>
+          <label class="player-count-choice"><input type="radio" name="player-count" value="5"><span>5</span></label>
+          <label class="player-count-choice"><input type="radio" name="player-count" value="6"><span>6</span></label>
+        </div>
+      </fieldset>
+      <div class="new-game-actions">
+        <button type="button" id="new-game-cancel">Cancel</button>
+        <button type="submit" id="new-game-start" class="primary">Start new game</button>
+      </div>
+    </form>
+  </dialog>
+  <dialog id="inspect-dialog" class="inspect-dialog" aria-labelledby="inspect-title">
+    <div class="inspect-head">
+      <h2 id="inspect-title">Inspected room</h2>
+      <button type="button" id="inspect-close" class="inspect-close" aria-label="Close inspected room">×</button>
+    </div>
+    <div id="inspect-body" class="inspect-body"></div>
+    <div class="inspect-actions">
+      <button type="button" id="destroy-room-btn" class="danger-btn" hidden>Destroy room</button>
+    </div>
+  </dialog>
+  <script src="js/playtest-core.js?v=12"></script>
+  <script src="js/playtest.js?v=14"></script>
+</body>
+</html>

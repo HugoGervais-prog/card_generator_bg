@@ -15,48 +15,85 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-    <link href="css/style_item.css" rel="stylesheet">
+    <link href="css/style_item.css?v=7" rel="stylesheet">
+    <link href="css/dashboard.css?v=4" rel="stylesheet">
 
     <script src="https://code.jquery.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="js/jquery-google-sheet-to-json.js"></script>
     <script src="js/jquery.csv.js"></script>
+    <script src="js/card-rules.js?v=4"></script>
+    <script src="js/dashboard.js?v=5"></script>
 
 </head>
 <body>
 
-    <!-- Header 
-    <header>
-        <h1>Pokemon Card Generator</h1>
-    </header>-->
+    <div class="app-container">
 
-    <!-- Main Content -->
-    <main>
-        <div style="float:left;" class="card_content" id="capture">
-            <!-- Frame -->
-            <img class="card_frame" src="img/base_frame/N_simple_area_void.png" width="810" height="1110">
+        <div class="card-section">
+            <div class="card_content" id="capture">
+                <!-- Frame -->
+                <img class="card_frame" src="img/base_frame/N_simple_area_void.png" width="810" height="1110">
 
-            <!-- Name 
-            <p class="card_name"></p>-->
+                <!-- Name
+                <p class="card_name"></p>-->
 
-            <!-- Name -->
-            <p class="mana_cost">XXXX</p>
+                <!-- Type cost -->
+                <p class="mana_cost">XXXX</p>
 
-            <!-- Copyright -->
-            <p class="copyright">Area - <span class="nbSerie">001</span>/<span class="totalArea">001</span></p>
-
+                <!-- Copyright -->
+                <p class="copyright">Area - <span class="nbSerie">001</span>/<span class="totalArea">001</span></p>
+            </div>
         </div>
 
-        <select id="menu_pokemon" style="float:left;font-size:16px;margin-left:10px;padding: 10px;">
-            <option></option>
-        </select>
-        <button style="float:left;font-size:16px;margin-left:10px;padding: 10px;width:40%;" id="download-btn">Download Image (Make sure zoom is at 100%)</button>
-        <p class="total">0 / 0 feuilles</p>
+        <div class="sidebar-section">
+            <div class="control-panel">
+                <h2>Area Generator</h2>
+                <div class="control-group">
+                    <select id="menu_pokemon">
+                        <option></option>
+                    </select>
+                    <p class="total">0 / 0 sheets</p>
+                </div>
+                <button id="download-btn">Download Image</button>
+                <p class="help-text">Make sure browser zoom is at 100% before downloading.</p>
+            </div>
 
-        <div class="button_table">
-        <div>
+            <div class="roster-panel">
+                <h2>Areas</h2>
+                <div class="button_table"></div>
+            </div>
+        </div>
 
-    </main>
+        <div class="third-column">
+            <div class="dashboard-section"></div>
+
+            <details class="edit-panel" open>
+                <summary><h2>Edit Area</h2></summary>
+                <div class="edit-grid">
+                    <label class="full">Name<input id="edit-name" placeholder="Normal_Water_Ground"></label>
+                    <label class="full"><span class="label-row">Type cost <span class="ref-tip" tabindex="0" aria-label="Symbol reference">?<span class="ref-tip-box"></span></span></span>
+                        <input id="edit-mana" placeholder="{NOR}{WAT}{GRD}">
+                        <span class="field-hint" id="mana-hint"></span>
+                    </label>
+                    <div class="full image-row">
+                        <span class="image-row-label">Image file</span>
+                        <code id="image-name">img/area/…</code>
+                        <span id="image-status" class="image-status"></span>
+                        <button id="copy-image-btn" type="button">Copy image name</button>
+                        <button id="upload-image-btn" type="button">Upload image</button>
+                        <input id="upload-image-input" type="file" accept="image/*" hidden>
+                        <span class="image-drop-hint">or drop a picture here &middot; saved as the name above, in img/area/</span>
+                    </div>
+                </div>
+                <div class="edit-buttons">
+                    <button id="revert-btn" type="button">Revert</button>
+                    <button id="save-btn" type="button">Save to CSV</button>
+                </div>
+                <p class="save-status"></p>
+            </details>
+        </div>
+    </div>
 
     <!-- Script -->
     <script>
@@ -92,7 +129,7 @@
 
             $.ajax({
                 url: 'data/area.csv', // Path to your CSV file
-                dataType: 'text',
+                dataType: 'text', cache: false, // always read the current file, not a cached copy
                 success: function(csvData) {
                     // Process the data once it's successfully loaded
                     parseCsvWithPlugin(csvData);
@@ -132,7 +169,11 @@
                         
                     );
                     totalItem = totalItem+1;
-                    $(".button_table").append('<button class="pokemon_button" id="' + parseInt(item.ID) + '"><img src="img/area/' + item.Name + '.jpg"></button>');
+                    $(".button_table").append(
+                        $("<button>", { "class": "pokemon_button", id: parseInt(item.ID), title: "#" + item.ID + " " + item.Name.replace(/_/g, " ") + "  " + item.Mana })
+                            .append(areaButtonImage(item.Name))
+                            .append($("<span>", { "class": "area_types" }).html(replaceTypeIcons(item.Mana || "").replace(/move_icons_text/g, "area_type_icon")))
+                    );
 
 
                 }
@@ -183,20 +224,277 @@
         }
 
         function loadItemData(index) {
-            var indexItem = index;
-            var ID = aItemData[indexItem].ID;
-            var name = aItemData[indexItem].Name;
-            var Title = aItemData[indexItem].Title;
-            var mana = aItemData[indexItem].Mana;
-
-            $(".card_name").html(Title);
-
-            $(".mana_cost").html(replaceTypeIcons(mana));
-
-            $(".card_content").css("background-image", "url('../img/area/" + name + ".jpg')");
-
-            $(".nbSerie").html(String(index+1).padStart(3, '0'));
+            if (!aItemData[index]) return;
+            curIndex = index;
+            fillEditForm(aItemData[index]);
+            renderItem(aItemData[index]);
+            $(".pokemon_button").removeClass("active").filter('[id="' + parseInt(aItemData[index].ID, 10) + '"]').addClass("active");
         }
+
+        function renderItem(p) {
+            $(".card_name").html(p.Title || "");
+            $(".mana_cost").html(replaceTypeIcons(p.Mana || ""));
+            $(".card_content").css("background-image", "url('../img/area/" + p.Name + ".jpg" + imageVersion(p.Name) + "')");
+            $(".nbSerie").html(String(curIndex + 1).padStart(3, '0'));
+            showImageName(p.Name);
+            showManaHint(p);
+        }
+
+        // ===== Area editor =====
+        var curIndex = 0;
+        var CSV_FILE = "area.csv";
+        var FORM_FIELDS = { "Name": "#edit-name", "Mana": "#edit-mana" };
+
+        $(function() {
+            $(".edit-panel").on("input change", "input", function() {
+                $(".save-status").text("Unsaved changes").attr("class", "save-status dirty");
+                renderItem(readEditForm());
+            });
+            $("#revert-btn").on("click", function() { loadItemData(curIndex); });
+            $("#save-btn").on("click", saveCurrentArea);
+            $("#copy-image-btn").on("click", copyImageName);
+            $("#upload-image-btn").on("click", function() { $("#upload-image-input").val("").trigger("click"); });
+            $("#upload-image-input").on("change", function() { if (this.files[0]) uploadImage(this.files[0]); });
+            $(".image-row").on("dragover", function(e) { e.preventDefault(); $(this).addClass("dragging"); })
+                .on("dragleave drop", function() { $(this).removeClass("dragging"); })
+                .on("drop", function(e) {
+                    e.preventDefault();
+                    var f = e.originalEvent.dataTransfer.files[0];
+                    if (f) uploadImage(f);
+                });
+            buildSymbolReference();
+            // Remember whether the Edit panel is open or collapsed
+            var editPanel = document.querySelector(".edit-panel");
+            if (localStorage.getItem("areaEditPanelOpen") === "0") editPanel.open = false;
+            editPanel.addEventListener("toggle", function() { localStorage.setItem("areaEditPanelOpen", editPanel.open ? "1" : "0"); });
+        });
+
+        function fillEditForm(p) {
+            $.each(FORM_FIELDS, function(col, sel) { $(sel).val(p[col] || ""); });
+            $(".save-status").text("").attr("class", "save-status");
+        }
+
+        function readEditForm() {
+            var p = $.extend({}, aItemData[curIndex]);
+            p.Name = String($("#edit-name").val() || "").trim();
+            // type codes in upper case and without stray spaces: "{ nor}{wat}" -> "{NOR}{WAT}"
+            p.Mana = String($("#edit-mana").val() || "").replace(/\s+/g, "").replace(/\{([^}]*)\}/g, function(m, c) { return "{" + c.toUpperCase() + "}"; });
+            return p;
+        }
+
+        // ---- image file name (the picture for an area is img/area/<Name>.jpg) ----
+        function imageFileName(name) { return name + ".jpg"; }
+
+        function showImageName(name) {
+            $("#image-name").text("img/area/" + imageFileName(name || "…"));
+            var $st = $("#image-status").text("").attr("class", "image-status");
+            if (!name) return;
+            var img = new Image();
+            img.onload = function() { if ($("#edit-name").val().trim() === name) $st.text("found ✓").addClass("ok"); };
+            img.onerror = function() { if ($("#edit-name").val().trim() === name) $st.text("missing").addClass("missing"); };
+            img.src = "img/area/" + encodeURIComponent(imageFileName(name)) + "?t=" + Date.now();
+        }
+
+        function copyImageName() {
+            var text = imageFileName(readEditForm().Name);
+            var done = function() {
+                var $b = $("#copy-image-btn").text("Copied ✓").addClass("copied");
+                setTimeout(function() { $b.text("Copy image name").removeClass("copied"); }, 1500);
+            };
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(done, function() { fallbackCopy(text); done(); });
+            } else { fallbackCopy(text); done(); }
+        }
+
+        function fallbackCopy(text) {
+            var $t = $("<textarea>").val(text).css({ position: "fixed", opacity: 0 }).appendTo("body");
+            $t[0].select(); document.execCommand("copy"); $t.remove();
+        }
+
+        // ---- type cost checks: unknown codes and a type combination another area already has ----
+        var KNOWN_CODES = ["ALL"].concat($.map(TYPE_CODES, function(c) { return c; }));
+
+        function typeSet(mana) {
+            return (String(mana || "").match(/\{([^}]*)\}/g) || []).map(function(t) { return t.slice(1, -1).toUpperCase(); })
+                .filter(function(c, i, a) { return a.indexOf(c) === i; }).sort().join(",");
+        }
+
+        function showManaHint(p) {
+            var codes = (String(p.Mana || "").match(/\{([^}]*)\}/g) || []).map(function(t) { return t.slice(1, -1).toUpperCase(); });
+            var unknown = codes.filter(function(c) { return KNOWN_CODES.indexOf(c) < 0; });
+            var key = typeSet(p.Mana);
+            var same = key ? $.grep(aItemData, function(a) { return a.ID !== p.ID && a.Name && typeSet(a.Mana) === key; }) : [];
+            var msg = [];
+            if (unknown.length) msg.push("Unknown code: " + unknown.map(function(c) { return "{" + c + "}"; }).join(" "));
+            if (same.length) msg.push("Same types as #" + same[0].ID + " " + same[0].Name + (same.length > 1 ? " and " + (same.length - 1) + " more" : ""));
+            $("#mana-hint").text(msg.length ? msg.join(" · ") : codes.length + " type" + (codes.length === 1 ? "" : "s")).toggleClass("warn", msg.length > 0);
+        }
+
+        // ---- saving to data/area.csv ----
+        function csvField(v) {
+            v = String(v == null ? "" : v);
+            return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+        }
+
+        // Same store as the card and thesis pages, so the Generator folder is only picked once
+        function idb(mode, fn) {
+            return new Promise(function(res, rej) {
+                var o = indexedDB.open("pokemonCardEditor", 1);
+                o.onupgradeneeded = function() { o.result.createObjectStore("h"); };
+                o.onsuccess = function() {
+                    var tx = o.result.transaction("h", mode); var q = fn(tx.objectStore("h"));
+                    tx.oncomplete = function() { res(q && q.result); }; tx.onerror = rej;
+                };
+                o.onerror = rej;
+            });
+        }
+
+        // The Generator folder (asked for once, then remembered); checked by looking for data/area.csv
+        async function getGeneratorDir() {
+            if (!window.showDirectoryPicker) throw new Error("This browser cannot write files. Use Chrome or Edge.");
+            var dir = await idb("readonly", function(s) { return s.get("dir"); });
+            if (dir && (await dir.requestPermission({ mode: "readwrite" })) === "granted") {
+                try { await (await dir.getDirectoryHandle("data")).getFileHandle(CSV_FILE); return dir; } catch (e) {}
+            }
+            alert("Pick the Generator folder (the one containing item.html) so the page can save files there.");
+            dir = await window.showDirectoryPicker({ mode: "readwrite" });
+            try { await (await dir.getDirectoryHandle("data")).getFileHandle(CSV_FILE); }
+            catch (e) { throw new Error("That folder has no data/" + CSV_FILE + ". Pick the Generator folder itself."); }
+            await idb("readwrite", function(s) { return s.put(dir, "dir"); });
+            return dir;
+        }
+
+        async function getCsvHandle() {
+            return (await (await getGeneratorDir()).getDirectoryHandle("data")).getFileHandle(CSV_FILE);
+        }
+
+        // ---- image upload: saves the picture as img/area/<Name>.jpg ----
+        var imageVersions = {}; // name -> timestamp of the last upload, so the browser shows the new picture
+        function imageVersion(name) { return imageVersions[name] ? "?v=" + imageVersions[name] : ""; }
+
+        // JPEG files are saved byte for byte; other formats (PNG, WebP...) are converted to JPEG
+        function toJpegBlob(file) {
+            if (file.type === "image/jpeg") return Promise.resolve(file);
+            return new Promise(function(res, rej) {
+                var url = URL.createObjectURL(file), img = new Image();
+                img.onload = function() {
+                    var c = document.createElement("canvas");
+                    c.width = img.naturalWidth; c.height = img.naturalHeight;
+                    var x = c.getContext("2d");
+                    x.fillStyle = "#000"; x.fillRect(0, 0, c.width, c.height); // transparent parts become black, like the card
+                    x.drawImage(img, 0, 0);
+                    URL.revokeObjectURL(url);
+                    c.toBlob(function(b) { b ? res(b) : rej(new Error("Could not convert the picture to JPEG.")); }, "image/jpeg", 0.92);
+                };
+                img.onerror = function() { URL.revokeObjectURL(url); rej(new Error("That file is not a picture the browser can read.")); };
+                img.src = url;
+            });
+        }
+
+        async function uploadImage(file) {
+            if (!/^image\//.test(file.type)) { alert("Please choose a picture file."); return; }
+            var p = readEditForm();
+            if (!p.Name) { alert("Give the area a name first: the picture is saved under that name."); return; }
+            var fileName = imageFileName(p.Name);
+            if (p.Name !== aItemData[curIndex].Name &&
+                !confirm("The name was changed but not saved yet. Save the picture as " + fileName + "?\n(Remember to also click Save to CSV.)")) return;
+            var $st = $("#image-status").text("uploading…").attr("class", "image-status");
+            try {
+                var blob = await toJpegBlob(file);
+                var areaDir = await (await (await getGeneratorDir()).getDirectoryHandle("img", { create: true })).getDirectoryHandle("area", { create: true });
+                var exists = true;
+                try { await areaDir.getFileHandle(fileName); } catch (e) { exists = false; }
+                if (exists && !confirm("img/area/" + fileName + " already exists. Replace it with the new picture?")) { showImageName(p.Name); return; }
+                var fh = await areaDir.getFileHandle(fileName, { create: true });
+                var w = await fh.createWritable(); await w.write(blob); await w.close();
+
+                imageVersions[p.Name] = Date.now();
+                renderItem(p);
+                $('.pokemon_button[id="' + parseInt(p.ID, 10) + '"]').find("img, .area_noart").replaceWith(areaButtonImage(p.Name));
+                $st.text("saved ✓" + (file.type === "image/jpeg" ? "" : " (converted to JPEG)")).attr("class", "image-status ok");
+            } catch (e) {
+                if (e.name === "AbortError") { showImageName(p.Name); return; }
+                $st.text("upload failed: " + e.message).attr("class", "image-status missing");
+            }
+        }
+
+        // Re-reads the CSV from disk and changes only the given columns of one row, so edits made elsewhere are kept
+        async function writeCsvRow(id, changes) {
+            var fh = await getCsvHandle();
+            var text = await (await fh.getFile()).text();
+            var nl = text.indexOf("\r\n") >= 0 ? "\r\n" : "\n";
+            var rows = $.csv.toArrays(text);
+            while (rows.length && rows[rows.length - 1].join("") === "" && rows[rows.length - 1].length <= 1) rows.pop();
+            var header = rows[0];
+            var idCol = header.indexOf("ID");
+            var row = rows.find(function(r, i) { return i > 0 && r[idCol] === String(id); });
+            if (!row) throw new Error("Row with ID " + id + " not found in " + CSV_FILE + ".");
+            $.each(changes, function(col, val) {
+                var c = header.indexOf(col);
+                if (c >= 0) { while (row.length <= c) row.push(""); row[c] = val; }
+            });
+            var out = rows.map(function(r) { return r.map(csvField).join(","); }).join(nl) + nl;
+            var w = await fh.createWritable(); await w.write(out); await w.close();
+        }
+
+        async function saveCurrentArea() {
+            var p = readEditForm();
+            if (!p.Name) { alert("Name cannot be empty."); return; }
+            var clash = $.grep(aItemData, function(a) { return a.ID !== p.ID && (a.Name || "").toLowerCase() === p.Name.toLowerCase(); });
+            if (clash.length) { alert("Area #" + clash[0].ID + " is already called " + clash[0].Name + ". Names must be unique because they are also the image file name."); return; }
+            $(".save-status").text("Saving…").attr("class", "save-status");
+            try {
+                await writeCsvRow(p.ID, { "Name": p.Name, "Mana": p.Mana });
+                aItemData[curIndex] = p;
+                $('#menu_pokemon option[value="' + p.ID + '"]').text("#" + p.ID + " " + p.Name);
+                var $btn = $('.pokemon_button[id="' + parseInt(p.ID, 10) + '"]').attr("title", "#" + p.ID + " " + p.Name.replace(/_/g, " ") + "  " + p.Mana);
+                $btn.find("img, .area_noart").replaceWith(areaButtonImage(p.Name));
+                $btn.find(".area_types").html(replaceTypeIcons(p.Mana || "").replace(/move_icons_text/g, "area_type_icon"));
+                fillEditForm(p);
+                renderItem(p);
+                Dash.reloadAreas();
+                $(".save-status").text("Saved to " + CSV_FILE + " ✓").attr("class", "save-status ok");
+            } catch (e) {
+                if (e.name === "AbortError") { $(".save-status").text("Save cancelled").attr("class", "save-status dirty"); return; }
+                $(".save-status").text("Save failed: " + e.message).attr("class", "save-status error");
+            }
+        }
+
+        function areaButtonImage(name) {
+            return $("<img>", { src: "img/area/" + name + ".jpg" + imageVersion(name) })
+                .on("error", function() { $(this).replaceWith('<span class="area_noart">No art yet</span>'); });
+        }
+
+        // Fills the "?" tooltip with every type code
+        function buildSymbolReference() {
+            var types = $.map(TYPE_CODES, function(code, name) {
+                return '<span class="ref-item"><img class="ref-icon" src="img/type/' + name.toLowerCase() + '.png"><code>{' + code + '}</code>' + name + '</span>';
+            }).join("");
+            $(".ref-tip-box").html(
+                '<span class="ref-title">Types</span><span class="ref-grid ref-types">' + types + '</span>' +
+                '<span class="ref-title">Other</span><span class="ref-grid">' +
+                    '<span class="ref-item"><img class="ref-icon" src="img/type/all.png"><code>{ALL}</code>All types (Starting area)</span>' +
+                '</span>' +
+                '<span class="ref-foot">Example: {NOR}{WAT}{GRD}</span>');
+        }
+
+        // ===== Dashboard: "Areas vs area-cost demand" (chart code shared with index_r.html in js/dashboard.js) =====
+        var aRoster = null; // data/data_r.csv, for the type icons in every Pokémon's area cost
+        $(function() {
+            $.ajax({ url: "data/data_r.csv", dataType: "text", cache: false, success: function(csv) {
+                aRoster = $.csv.toObjects(csv);
+                renderPageDashboard();
+            } });
+        });
+
+        window.renderPageDashboard = function() {
+            var root = document.querySelector(".dashboard-section");
+            var areas = Dash.getAreaRows();
+            if (!root || !areas || !aRoster) return;
+            Dash.hideTip();
+            $(root).empty();
+            Dash.costDemandPanel(root, Dash.areaStats(areas), Dash.rosterFrom(aRoster));
+        };
 
         function replaceTypeIcons(text) {
             const iconMap = {

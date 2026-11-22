@@ -1,0 +1,109 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #1b1b22; font-family: 'Roboto Condensed', sans-serif; color: #eee; }
+.app-container { display: flex; gap: 30px; padding: 30px; align-items: flex-start; }
+.sidebar-section { width: 360px; display: flex; flex-direction: column; gap: 20px; }
+.control-panel, .roster-panel { background: #2a2a35; border-radius: 10px; padding: 15px; }
+.control-panel h2, .roster-panel h2 { margin-top: 0; font-size: 20px; }
+#menu_room { width: 100%; padding: 6px; font-size: 16px; }
+#download-btn { width: 100%; padding: 10px; font-size: 16px; background: #b8862b; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+.help-text { font-size: 12px; color: #aaa; }
+.button_table { display: flex; flex-direction: column; gap: 4px; max-height: 600px; overflow-y: auto; }
+.room_button { text-align: left; padding: 6px 10px; background: #3a3a48; color: #eee; border: none; border-radius: 4px; cursor: pointer; }
+.room_button:hover, .room_button.active { background: #b8862b; }
+
+/* Card: 63 x 63 mm at the same scale as the 810 x 1110 cards (~12.86 px/mm) */
+.card_content { position: relative; width: 810px; height: 810px; background: #000; border-radius: 30px; overflow: hidden; padding: 28px; }
+.card_inner { position: relative; width: 100%; height: 100%; border-radius: 14px; overflow: hidden; background: #222; }
+.portrait_box { position: absolute; inset: 0; }
+.card_portrait { width: 100%; height: 100%; object-fit: cover; display: block; }
+.portrait_placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 26px; color: #777; }
+.card_name { position: absolute; top: 18px; left: 0; right: 0; margin: 0; padding: 0 20px; font-size: 50px; font-weight: 700; text-align: center; color: #fff; text-shadow: 3px 3px 6px #000, 0 0 10px #000; z-index: 2; }
+.effect_box { position: absolute; left: 20px; right: 20px; bottom: 20px; padding: 18px 24px; background: rgba(0,0,0,0.65); color: #fff; border-radius: 12px; font-size: 27px; line-height: 1.25; z-index: 2; }
+.effect_text { margin: 0; }
+.mana { display: inline-block; min-width: 30px; height: 30px; line-height: 30px; border-radius: 50%; background: #c9c1b0; color: #000; text-align: center; font-size: 20px; font-weight: 700; vertical-align: middle; }
+.index { position: absolute; bottom: 4px; right: 40px; margin: 0; font-size: 16px; color: #666; }
+.index { display: block; top: 44px; right: 44px; bottom: auto; padding: 8px 20px; border-radius: 999px; background: rgba(0,0,0,0.7); color: #fff; font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: 34px; line-height: 1.1; z-index: 3; }
+.effect_box, .effect_text { text-align: center; }
+.card_name { font-family: 'New Rocker', serif; font-weight: 400; }
+.button_table { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; max-height: 600px; overflow-y: auto; flex-direction: unset; }
+.room_button { padding: 0; aspect-ratio: 1; border: 3px solid transparent; border-radius: 6px; overflow: hidden; background: #000; }
+.room_button img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.room_button:hover, .room_button.active { border-color: #b8862b; background: #000; }
+.room_button { display: block; width: 100%; height: auto; } .room_button img { aspect-ratio: 1 / 1; height: auto; }
+.room_button { position: relative; } .room_label { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); color: #fff; font-size: 11px; line-height: 1.2; padding: 2px 3px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-section { width: 760px; } .button_table { grid-template-columns: repeat(9, 1fr); max-height: none; } .room_label { font-size: 9px; }
+
+/* print readability */
+.card_name{font-size:74px !important;}
+.effect_text{font-size:42px;line-height:1.2;}
+
+
+#print-list-btn { width: 100%; padding: 10px; margin-top: 8px; font-size: 16px; background: #444; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+#print-list-btn:hover { background: #666; }
+
+
+.sidebar-section { width: 1000px; } .button_table { grid-template-columns: repeat(12, 1fr); }
+
+.control-panel { position: relative; }
+.control-panel .total { position: absolute; top: 12px; right: 16px; margin: 0; }
+
+.btn-row { display: flex; gap: 4px; }
+.btn-row button { flex: 1; margin: 0; width: auto; }
+
+.btn-row { align-items: stretch; }
+.btn-row button, .btn-row #download-btn, .btn-row #print-list-btn { flex: 1 1 0; margin: 0 !important; padding: 12px 8px !important; height: 44px !important; box-sizing: border-box; line-height: 1; }
+
+.tap-symbol { height: 0.9em; width: 0.9em; vertical-align: -0.1em; margin: 0 0.05em; }
+
+.mana-symbol { height: 0.9em; width: 0.9em; vertical-align: -0.1em; margin: 0 0.05em; }
+
+/* edit form */
+.card-section { display: flex; flex-direction: column; gap: 20px; }
+.edit-form { width: 810px; background: #2a2a35; border-radius: 10px; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+.edit-form h2 { margin: 0 0 4px; font-size: 20px; }
+.edit-form label { font-size: 13px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; }
+.edit-form input, .edit-form textarea { width: 100%; padding: 10px 12px; font-family: 'Roboto Condensed', sans-serif; font-size: 18px; color: #eee; background: #1b1b22; border: 2px solid #3a3a48; border-radius: 6px; outline: none; }
+.edit-form input { font-family: 'New Rocker', serif; font-size: 22px; }
+.edit-form textarea { resize: vertical; min-height: 120px; line-height: 1.35; }
+.edit-form input:focus, .edit-form textarea:focus { border-color: #b8862b; }
+#save-btn { margin-top: 6px; height: 44px; font-size: 16px; background: #b8862b; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+#save-btn:hover { background: #d29b35; }
+.card_name { padding: 0 110px; }
+.card_portrait { filter: brightness(1.2); }
+
+/* Room picker: scroll wrapper is the 8-row viewport. Inner grid keeps natural/explicit
+   square rows so tracks cannot compress into the viewport (which previously overlapped tiles). */
+.button_table_wrap {
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding-right: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #b8862b #1b1b22;
+}
+.button_table_wrap::-webkit-scrollbar {
+  width: 10px;
+}
+.button_table_wrap::-webkit-scrollbar-track {
+  background: #1b1b22;
+  border-radius: 8px;
+}
+.button_table_wrap::-webkit-scrollbar-thumb {
+  background: #b8862b;
+  border-radius: 8px;
+  border: 2px solid #1b1b22;
+}
+.button_table_wrap::-webkit-scrollbar-thumb:hover {
+  background: #d29b35;
+}
+.button_table {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 6px;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+  align-content: start;
+  grid-auto-rows: var(--room-tile-size, auto);
+}

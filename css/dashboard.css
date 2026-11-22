@@ -1,0 +1,101 @@
+/* =========================================
+   ROSTER DASHBOARD (js/dashboard.js) - shared by index_r.html and item.html
+   ========================================= */
+.dashboard-section {
+    flex: 1 1 520px;
+    min-width: 440px;
+    display: grid; /* one column beside the sidebar; several when it wraps below at full width */
+    grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
+    align-items: start;
+    gap: 20px;
+}
+.dashboard-section > .dash-panel:first-child { grid-column: 1 / -1; }
+.dash-panel {
+    background-color: #2b2b36;
+    padding: 20px 22px;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    border: 1px solid #3f3f4e;
+}
+.dash-panel h3 {
+    margin: 0 0 4px;
+    font-size: 17px;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+}
+.dash-sub { margin: 0 0 10px; font-size: 13px; color: #a0a0b0; line-height: 1.35; }
+.dash-chart { width: 100%; }
+.dash-chart svg { display: block; font-family: "Roboto Condensed", sans-serif; overflow: visible; }
+
+.dash-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+}
+.dash-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background-color: #1e1e24;
+}
+.dt-label { font-size: 12px; font-weight: 700; color: #a0a0b0; text-transform: uppercase; letter-spacing: 0.05em; }
+.dt-value { font-size: 30px; font-weight: 700; color: #ffffff; line-height: 1.1; }
+.dt-foot { display: block; font-size: 12px; line-height: 1.4; color: #a0a0b0; min-height: 17px; margin-top: 2px; }
+.dt-foot .note_dot, .dash-note .note_dot { width: 9px; height: 9px; border-width: 1px; }
+.dt-foot .note_dot { vertical-align: -1px; margin: 0 2px 0 6px; }
+.dt-foot .note_dot:first-child { margin-left: 0; }
+
+.dash-legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 0 0 8px; font-size: 13px; color: #a0a0b0; }
+.dash-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dash-legend i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; }
+
+.dash-note {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    margin-top: 6px;
+    border: none;
+    border-radius: 8px;
+    background-color: #1e1e24;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+}
+.dash-note:hover { background-color: #34343f; }
+.dash-note .note_dot { flex: none; transform: translateY(1px); }
+.dn-name { flex: none; font-weight: 700; }
+.dn-text { color: #a0a0b0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.dash-tooltip {
+    position: fixed;
+    z-index: 1000;
+    display: none;
+    max-width: 280px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background-color: #111116;
+    border: 1px solid #4a4a5a;
+    color: #ffffff;
+    font-size: 13px;
+    line-height: 1.4;
+    pointer-events: none;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+}
+.dash-tooltip .dt-muted { color: #a0a0b0; }
+
+/* Note dots (also defined in style_r.css) so the notes list works on any page */
+.dash-panel .note_dot { display: inline-block; border-radius: 50%; border: 1px solid #1e1e24; background-color: #888; }
+.dash-panel .note_p1 { background-color: #ff3b30; }
+.dash-panel .note_p2 { background-color: #f5d02f; }
+.dash-panel .note_p3 { background-color: #3b8bff; }
+
+/* Print sheets row in the dashboard header */
+.dash-panel h3.dash-subhead { margin: 24px 0 12px; font-size: 13px; font-weight: 700; color: #a0a0b0; text-transform: uppercase; letter-spacing: 0.06em; }
+.dash-tile-total { background-color: #34343f; border: 1px solid #f5d02f; }
+.dash-tile-total .dt-value { color: #f5d02f; }
