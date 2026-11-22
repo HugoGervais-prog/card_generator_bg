@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-    <link href="css/style_r.css?v=2" rel="stylesheet">
+    <link href="css/style_r.css?v=8" rel="stylesheet">
     <link href="css/dashboard.css" rel="stylesheet">
 
     <script src="https://code.jquery.com"></script>
@@ -21,7 +21,7 @@
     <script src="js/jquery-google-sheet-to-json.js"></script>
     <script src="js/jquery.csv.js"></script>
     <script src="js/card-rules.js?v=4"></script>
-    <script src="js/dashboard.js?v=6"></script>
+    <script src="js/dashboard.js?v=9"></script>
 </head>
 <body>
 
@@ -40,6 +40,12 @@
 
                 <p class="card_name">Bulbasaur</p>
 
+                <!-- Stage (Basic / Stage 1 / Stage 2) and the Pokémon it evolves from, like the TCG; filled from PokéAPI -->
+                <div class="stage_box" hidden>
+                    <span class="stage_label">BASIC</span>
+                    <div class="evo_bubble"><img class="evo_sprite" alt=""></div>
+                </div>
+
                 <div class="cost_row"></div>
 
                 
@@ -52,6 +58,7 @@
                 <img class="c_icons" src="img/icons/ball.png">
                 <p class="capture_rate">29</p>
 
+                <div class="info_bar"></div>
                 <p class="index">0001</p>
 
                 <img class="ruler_icon" src="img/ruler.png">
@@ -60,7 +67,9 @@
                 <img class="weight_icon" src="img/weight.png">
                 <p class="weight">999.99 kg</p>
 
-                <p class="copyright">&copy;2026 Pokémon / Nintendo / Creatures / GAME FREAK</p>
+                <img class="egg_icon" src="img/egg-white.png">
+                <p class="egg_groups"></p>
+
             </div>
         </div>
 
@@ -88,7 +97,7 @@
                     <label>Name<input id="edit-name"></label>
                     <label>Rarity
                         <select id="edit-rarity">
-                            <option value="B">B - Basic</option>
+                            <option value="B">B - Beginner</option>
                             <option value="I">I - Intermediate</option>
                             <option value="A">A - Advanced</option>
                             <option value="E">E - Expert</option>
@@ -187,11 +196,11 @@
             $select.empty();
             $.each(aPokemonData, function(index, pokemon) {
 
-                var paddedID = String(pokemon.ID).padStart(4, '0');
+                var paddedID = String(dexNumber(pokemon)).padStart(4, '0');
 
                 
                 if (pokemon.Name && pokemon.Name.trim() !== "") {
-                    lastId = parseInt(pokemon.ID, 10) - 1;
+                    lastId = index;
                     $select.append(
                         $("<option>", {
                             value: pokemon.ID,
@@ -201,7 +210,7 @@
                         
                     );
                     totalPokemon = totalPokemon+1;
-                    $(".button_table").append('<button class="pokemon_button gen' + getPokemonGeneration(pokemon.ID) + '" id="' + pokemon.ID + '"><img src="img/sprite/' + paddedID + ' ' + pokemon.Name + '.png"></button>');
+                    $(".button_table").append('<button class="pokemon_button gen' + pokemonGeneration(pokemon) + '" id="' + pokemon.ID + '"><img src="' + spritePath(pokemon) + '"></button>');
                     updateNoteIndicator(pokemon);
 
 
@@ -223,12 +232,12 @@
                 window.history.replaceState({}, "", url);
 
                 // Load the data
-                loadPokemonData(selectedValue - 1);
+                loadPokemonData(indexOfId(selectedValue));
 
             });
 
             if (urlId) {
-                loadPokemonData(parseInt(urlId, 10) - 1);
+                loadPokemonData(indexOfId(urlId));
             } else {
                 loadPokemonData(lastId);
             }
@@ -246,7 +255,7 @@
                 window.history.replaceState({}, "", url);
 
                 // Load Pokémon data
-                loadPokemonData(id-1);
+                loadPokemonData(indexOfId(id));
 
             });
 
@@ -281,7 +290,7 @@
             $(".portrait_box").css("top", size < 36 ? "100px" : "150px");
         }
         // Re-measure once the card font has loaded and whenever an icon inside the text finishes loading
-        if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutAbilityBox);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(function() { layoutAbilityBox(); fitEggGroups(); });
         $(function() { $(".ability_text").each(function() { this.addEventListener("load", layoutAbilityBox, true); }); });
 
         function renderCard(p) {
@@ -301,14 +310,14 @@
         
             $(".card_name").html(name);
 
-            var paddedID = String(ID).padStart(4, '0');
+            var paddedID = String(dexNumber(p)).padStart(4, '0');
 
 
             $(".card_portrait").show();
             $(".a_box_border").show();
-            $(".card_portrait").attr("src", "img/sprite/" + paddedID + " " + name + ".png");
+            $(".card_portrait").attr("src", spritePath(p));
 
-            $(".gen_tag").html(getPokemonGeneration(ID) + ' - ' + getPokemonRegion(ID));
+            $(".gen_tag").html(pokemonGeneration(p) + ' - ' + pokemonRegion(p));
             if(ability_r_name.length){
                 $(".ability_name").show();
                 $(".ability_text").show();
@@ -322,7 +331,7 @@
                 $(".ability_text").hide();
             }
 
-            $(".index").html(paddedID + ' - ' + getPokemonRegion(ID));
+            $(".index").html(paddedID + ' - ' + pokemonRegion(p));
 
             if (ID === lastDimsId) { /* already fetched for this Pokémon */ } else
             getPokemonDimensions(lastDimsId = ID).then(pokemon => {
@@ -333,6 +342,13 @@
 
                     $(".height").html(pokemon.height.meters + " m");
                     $(".weight").html(pokemon.weight.kg + " kg");
+                    $(".egg_groups").text(pokemon.eggGroups.join(" / "));
+                    fitEggGroups();
+                    renderStage(pokemon.stage);
+                } else {
+                    renderStage(null);
+                    $(".egg_groups").text("");
+                    fitEggGroups(); // re-aligns the bar for the empty egg groups
                 }
             });
 
@@ -605,10 +621,10 @@
                 // Update the page without reloading
                 var oldName = aPokemonData[curIndex].Name;
                 aPokemonData[curIndex] = p;
-                var paddedID = String(p.ID).padStart(4, "0");
+                var paddedID = String(dexNumber(p)).padStart(4, "0");
                 $('#menu_pokemon option[value="' + p.ID + '"]').text("#" + paddedID + " " + p.Name);
                 if (oldName !== p.Name) {
-                    $('.pokemon_button[id="' + p.ID + '"] img').attr("src", "img/sprite/" + paddedID + " " + p.Name + ".png");
+                    $('.pokemon_button[id="' + p.ID + '"] img').attr("src", spritePath(p));
                 }
                 renderCard(p);
                 updateNoteIndicator(p);
@@ -665,6 +681,31 @@
             }
         }   
         
+        // ===== Regional forms (CSV columns Form and Sprite) =====
+        // A form row has its own ID (the PokéAPI number, e.g. 10091 for Alolan Rattata, so PokéAPI data loads directly),
+        // Form = Alola / Galar / Hisui / Paldea, and Sprite = the sprite file name, which starts with the National Dex number.
+        var FORM_GENERATION = { Alola: 7, Galar: 8, Hisui: 8, Paldea: 9 };
+        // Species that only evolve from a regional form (PokéAPI's evolution data doesn't say which form)
+        var EVOLVES_FROM_FORM = {
+            862: "Galar",  // Obstagoon  <- Galarian Linoone
+            863: "Galar",  // Perrserker <- Galarian Meowth
+            864: "Galar",  // Cursola    <- Galarian Corsola
+            865: "Galar",  // Sirfetch'd <- Galarian Farfetch'd
+            866: "Galar",  // Mr. Rime   <- Galarian Mr. Mime
+            867: "Galar",  // Runerigus  <- Galarian Yamask
+            903: "Hisui",  // Sneasler   <- Hisuian Sneasel
+            904: "Hisui",  // Overqwil   <- Hisuian Qwilfish
+            980: "Paldea"  // Clodsire   <- Paldean Wooper
+        };
+        function dexNumber(p) { return p.Sprite ? parseInt(p.Sprite, 10) : parseInt(p.ID, 10); }
+        function spritePath(p) { return "img/sprite/" + (p.Sprite || String(p.ID).padStart(4, "0") + " " + p.Name) + ".png"; }
+        function pokemonRegion(p) { return p.Form || getPokemonRegion(dexNumber(p)); }
+        function pokemonGeneration(p) { return FORM_GENERATION[p.Form] || getPokemonGeneration(dexNumber(p)); }
+        function indexOfId(id) {
+            var i = aPokemonData.findIndex(function(p) { return String(p.ID) === String(id); });
+            return i < 0 ? 0 : i;
+        }
+
         function getPokemonGeneration(id) {
 
             id = parseInt(id, 10);
@@ -755,6 +796,87 @@
          * Fetches a Pokémon's height and weight by name or ID.
          * @param {string|number} pokemonNameOrId - The name or ID of the Pokémon.
          */
+        // PokéAPI egg group ids -> names used in the games
+        const EGG_GROUP_NAMES = {
+            "monster": "Monster", "water1": "Water 1", "water2": "Water 2", "water3": "Water 3",
+            "bug": "Bug", "flying": "Flying", "ground": "Field", "fairy": "Fairy", "plant": "Grass",
+            "humanshape": "Human-Like", "mineral": "Mineral", "indeterminate": "Amorphous",
+            "ditto": "Ditto", "dragon": "Dragon", "no-eggs": "Undiscovered"
+        };
+
+        // Info bar layout. Weight and height are right-aligned: the height ends at BAR_END and everything else is placed
+        // leftward from it using each text's real width. Egg groups sit on the left, start at 40px and shrink to fit the
+        // space left before the weight, but never below 32px (smaller is hard to read in print).
+        var BAR_END = 741;      // right edge for the height text (the bar itself ends at 751)
+        var ICON_GAP = 5;       // between an icon and its text
+        var GROUP_GAP = 24;     // between the weight and the ruler icon
+        var EGG_GAP = 14;       // minimum space between the egg groups and the weight icon
+        function textWidth($el) {
+            var old = $el[0].style.width;
+            $el.css({ width: "auto", "white-space": "nowrap" });
+            var w = $el[0].offsetWidth;
+            $el[0].style.width = old;
+            return w;
+        }
+        function fitEggGroups() {
+            var $egg = $(".egg_groups"), $wi = $(".weight_icon"), $w = $(".weight"), $ri = $(".ruler_icon"), $h = $(".height");
+            var hLeft  = BAR_END - textWidth($h);
+            var riLeft = hLeft - ICON_GAP - $ri[0].offsetWidth;
+            var wLeft  = riLeft - GROUP_GAP - textWidth($w);
+            var wiLeft = wLeft - ICON_GAP - $wi[0].offsetWidth;
+            $h.css("left", hLeft + "px");   $ri.css("left", riLeft + "px");
+            $w.css("left", wLeft + "px");   $wi.css("left", wiLeft + "px");
+
+            $egg.css("width", "");
+            var room = wiLeft - EGG_GAP - $egg[0].offsetLeft;
+            for (var size = 40; size > 32; size--) {
+                $egg.css("font-size", size + "px");
+                if (textWidth($egg) <= room) break;
+            }
+            $egg.css({ "font-size": size + "px", width: room + "px" });
+        }
+
+        // ===== Evolution stage, TCG terms: Basic / Stage 1 / Stage 2 =====
+        // Counts the species this one evolves from, skipping baby Pokémon as the TCG does
+        // (Pichu -> Pikachu: Pikachu is Basic; Raichu is Stage 1; Mime Jr. -> Mr. Mime: Mr. Mime is Basic).
+        var speciesCache = {};
+        function getSpecies(url) {
+            if (!speciesCache[url]) speciesCache[url] = fetch(url).then(function(r) {
+                if (!r.ok) throw new Error("species " + r.status);
+                return r.json();
+            });
+            return speciesCache[url];
+        }
+        async function getStage(species) {
+            var count = 0, from = null, prev = species.evolves_from_species;
+            while (prev) {
+                var s = await getSpecies(prev.url);
+                if (!s.is_baby) {
+                    count++;
+                    if (!from) from = { id: parseInt(prev.url.split("/").filter(Boolean).pop(), 10), name: s.name };
+                }
+                prev = s.evolves_from_species;
+            }
+            return { stage: Math.min(count, 2), from: from };
+        }
+        function renderStage(st) {
+            var $box = $(".stage_box");
+            if (!st) { $box.prop("hidden", true); return; }
+            $box.prop("hidden", false);
+            $box.find(".stage_label").text(st.stage === 0 ? "BASIC" : "STAGE " + st.stage);
+            // Bubble with the pre-evolution's sprite. A regional form evolves from the same region's form when there is one
+            // (Alolan Raticate <- Alolan Rattata), otherwise from the normal form (Alolan Raichu <- Pikachu).
+            var p = null;
+            if (st.stage > 0 && st.from) {
+                var cur = aPokemonData[curIndex] || {};
+                var form = cur.Form || EVOLVES_FROM_FORM[dexNumber(cur)];
+                var pre = $.grep(aPokemonData, function(x) { return x.Name && dexNumber(x) === st.from.id; });
+                p = $.grep(pre, function(x) { return form && x.Form === form; })[0] || $.grep(pre, function(x) { return !x.Form; })[0] || pre[0] || null;
+            }
+            $box.toggleClass("evolved", !!p);
+            if (p) $box.find(".evo_sprite").attr({ src: spritePath(p), alt: p.Name });
+        }
+
         async function getPokemonDimensions(pokemonNameOrId) {
         // PokéAPI requires names to be lowercase
         const searchName = pokemonNameOrId.toString().toLowerCase().trim();
@@ -768,6 +890,16 @@
             }
 
             const data = await response.json();
+
+            // Egg groups and the evolution stage live on the species endpoint, not the pokemon endpoint
+            let eggGroups = [], stage = null;
+            try {
+                const species = await getSpecies(data.species.url);
+                eggGroups = species.egg_groups.map(g => EGG_GROUP_NAMES[g.name] || g.name);
+                stage = await getStage(species);
+            } catch (e) {
+                console.error("Error fetching species:", e.message);
+            }
             
             // Extract and convert raw units (decimeters & hectograms)
             const heightInMeters = data.height / 10; 
@@ -784,7 +916,9 @@
             weight: {
                 raw: data.weight,
                 kg: weightInKilograms
-            }
+            },
+            eggGroups: eggGroups,
+            stage: stage
             };
         } catch (error) {
             console.error("Error fetching Pokémon data:", error.message);

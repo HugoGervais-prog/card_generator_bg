@@ -6,7 +6,7 @@ Columns, in order:
 `ID,Name,Rarity,Type1,Type2,Ability_R_Name,Ability_R_Effect,Sheet,Points,Cost,Note,Note_Priority`
 
 - **ID**: Pokédex number. Rows with an empty Name are placeholders; ignore them and leave them untouched.
-- **Rarity**: B (Basic), I (Intermediate), A (Advanced), E (Expert), M (Mythic), L (Legendary).
+- **Rarity**: B (Beginner), I (Intermediate), A (Advanced), E (Expert), M (Mythic), L (Legendary).
 - **Type1 / Type2**: Pokémon types. Type2 may be empty.
 - **Ability_R_Name / Ability_R_Effect**: optional ability. In effect text, `{WAT}` etc. are type icons, `{2}` / `{X}` are generic cost pips, and `+2` / `-1` are score bonuses and penalties.
 - **Sheet**: print sheet number. Ignore it.

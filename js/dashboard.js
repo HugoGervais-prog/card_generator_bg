@@ -13,8 +13,8 @@
         surface: "#2b2b36"
     };
     var RARITIES = ["B", "I", "A", "E", "M", "L"];
-    var RARITY_NAMES = { B: "Basic", I: "Intermediate", A: "Advanced", E: "Expert", M: "Mythic", L: "Legendary" };
-    var REGIONS = ["Kanto", "Johto", "Hoenn", "Sinnoh", "Unova", "Kalos", "Alola", "Galar", "Paldea"];
+    var RARITY_NAMES = { B: "Beginner", I: "Intermediate", A: "Advanced", E: "Expert", M: "Mythic", L: "Legendary" };
+    var REGIONS = ["Kanto", "Johto", "Hoenn", "Sinnoh", "Unova", "Kalos", "Alola", "Galar", "Hisui", "Paldea"];
     var NS = "http://www.w3.org/2000/svg";
     var areaRows = null; // data/area.csv rows [ID, Name, Mana, active], loaded once
     var thesisCount = null; // named rows in data/data_thesis.csv, loaded once
@@ -76,7 +76,7 @@
         var url = new URL(window.location);
         url.searchParams.set("id", id);
         window.history.replaceState({}, "", url);
-        loadPokemonData(id - 1);
+        loadPokemonData(typeof indexOfId === "function" ? indexOfId(id) : id - 1);
         $("html, body").animate({ scrollTop: 0 }, 200);
     }
 
@@ -99,7 +99,7 @@
                 p: p, id: p.ID, name: p.Name, rarity: p.Rarity, pts: Number(pts) || 0, cost: cost,
                 total: costTotal(cost), custom: String(pts) !== String(defPts) || cost !== defCost,
                 ability: !!(p.Ability_R_Name && p.Ability_R_Name.trim()),
-                region: typeof getPokemonRegion === "function" ? getPokemonRegion(p.ID) : null
+                region: typeof pokemonRegion === "function" ? pokemonRegion(p) : (typeof getPokemonRegion === "function" ? getPokemonRegion(p.ID) : null)
             };
         });
     }

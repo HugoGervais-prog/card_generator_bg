@@ -218,6 +218,45 @@ h2 {
     color: white;
     text-shadow: 3px 3px black;
 }
+/* Stage badge under the name bar: a small "BASIC" / "STAGE 1" / "STAGE 2" label, with the pre-evolution's
+   bubble under it for evolved Pokémon. Solid colours only (no filters or gradients) so html2canvas draws it the same. */
+.stage_box {
+    position: absolute;
+    top: 130px;           /* leaves a gap under the name banner */
+    left: 58px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border-radius: 16px;
+    background-color: rgb(0 0 0 / 70%);
+    font-family: "Roboto Condensed", sans-serif;
+}
+.stage_box.evolved { padding-bottom: 8px; }
+.stage_box[hidden] { display: none; }
+.stage_label {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    line-height: 1;
+    color: white;
+    padding: 0 2px;
+}
+.evo_bubble {
+    display: none;
+    width: 96px;
+    height: 96px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    border: 4px solid #c8c8d0;
+    background-color: #ececf0;
+    align-items: center;
+    justify-content: center;
+}
+.stage_box.evolved .evo_bubble { display: flex; }
+.evo_sprite { width: 82px; height: 82px; }
+
 /* Area cost: filled from the CSV "Cost" column, e.g. {2}{WAT}, drawn left to right */
 .cost_row {
     position: absolute;
@@ -523,22 +562,31 @@ h2 {
     font-weight: bold;
     text-shadow: 3px 3px black;
 }
+/* Dark info bar behind egg groups, weight and height (it used to be the background of .index) */
+.info_bar {
+    position: absolute;
+    top: 975px;
+    left: 60px;
+    width: 691px;
+    height: 49px;
+    background-color: rgb(0 0 0 / 70%);
+}
+/* Number and region: bottom left, under the info bar */
 .index {
     color: white;
     position: absolute;
-    top: 935px;
-    left: 60px;
-    font-size: 40px;
-    width: 686px;
-    height: 49px;
+    top: 1032px;
+    left: 52px;
+    margin: 0;
+    font-size: 32px;
+    width: 650px;
     text-align: left;
     font-family: "Roboto Condensed", sans-serif;
     font-optical-sizing: auto;
     font-style: normal;
     font-weight: 600;
     letter-spacing: 0px;
-    background-color: rgb(0 0 0 / 70%); 
-    padding-left: 5px;
+    white-space: nowrap;
 }
 .HP {
     color: white;
@@ -915,3 +963,28 @@ h2 {
 #save-resolve-btn { background-color: #2a7fd4; }
 #save-resolve-btn:hover { background-color: #3b8bff; }
 #save-resolve-btn[hidden] { display: none; }
+
+
+/* --- Egg groups (left of the info bar, before the weight) ---
+   The icon is a white PNG (img/egg-white.png), not a CSS filter: html2canvas ignores filters in the downloaded image. */
+.egg_icon {
+    position: absolute;
+    top: 981px;
+    left: 66px;
+    width: 36px;
+}
+.egg_groups {
+    color: white;
+    position: absolute;
+    top: 975px;
+    left: 108px;
+    margin: 0;
+    width: 279px;
+    height: 49px;
+    line-height: 49px;
+    font-size: 40px;
+    font-family: "Roboto Condensed", sans-serif;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+}
