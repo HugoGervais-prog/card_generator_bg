@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-    <link href="css/style_r.css?v=14" rel="stylesheet">
+    <link href="css/style_r.css?v=16" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="css/dashboard.css?v=6" rel="stylesheet">
 
@@ -107,6 +107,22 @@
                         <textarea id="edit-ability-effect" rows="4"></textarea>
                         <span class="field-hint"><span id="effect-length">0</span> characters &middot; icons: {WAT} {FIR} {GRA}&hellip; &middot; pips: {2} {X}</span>
                     </label>
+                    <div class="full art-row">
+                        <span class="art-row-label">Custom art</span>
+                        <code id="art-name">none</code>
+                        <span id="art-status" class="art-status"></span>
+                        <button id="upload-art-btn" type="button"><i class="bi bi-image"></i> Upload art</button>
+                        <button id="clear-art-btn" type="button" disabled><i class="bi bi-trash"></i> Clear</button>
+                        <input id="upload-art-input" type="file" accept="image/*" hidden>
+                        <span class="art-hint">Full art: replaces the background and hides the sprite. Saved in img/custom/ (or drop a picture here).</span>
+                        <div class="art-adjust" hidden>
+                            <label>Zoom <output id="art-zoom-val">100%</output><input id="edit-art-zoom" type="range" min="50" max="300" step="1" value="100"></label>
+                            <label>Horizontal <output id="art-x-val">50%</output><input id="edit-art-x" type="range" min="0" max="100" step="1" value="50"></label>
+                            <label>Vertical <output id="art-y-val">50%</output><input id="edit-art-y" type="range" min="0" max="100" step="1" value="50"></label>
+                            <button id="reset-art-btn" type="button"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                            <span class="art-hint">100% zoom fills the art area. Horizontal / vertical choose which part of the picture shows (50% = centre). Saved with Save to CSV.</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="edit-buttons">
                     <button id="revert-btn" type="button">Revert</button>
@@ -266,6 +282,7 @@
             curIndex = index;
             fillEditForm(aPokemonData[index]);
             renderCard(aPokemonData[index]);
+            showCustomArtRow(aPokemonData[index]);
             fitRosterToCard(); // the balancing note box changes the edit panel's height
             selectRosterButton(aPokemonData[index].ID);
         }
@@ -374,7 +391,8 @@
             var paddedID = String(dexNumber(p)).padStart(4, '0');
 
 
-            $(".card_portrait").show();
+            var hasCustomArt = String(p.Custom_Art || "").trim() !== "";
+            $(".card_portrait").toggle(!hasCustomArt);
             $(".a_box_border").show();
             $(".card_portrait").attr("src", spritePath(p));
 
@@ -476,8 +494,11 @@
         var FORM_FIELDS = {
             "Name": "#edit-name", "Rarity": "#edit-rarity", "Type1": "#edit-type1", "Type2": "#edit-type2",
             "Ability_R_Name": "#edit-ability-name", "Ability_R_Effect": "#edit-ability-effect",
-            "Points": "#edit-points", "Cost": "#edit-cost"
+            "Points": "#edit-points", "Cost": "#edit-cost",
+            "Art_Zoom": "#edit-art-zoom", "Art_X": "#edit-art-x", "Art_Y": "#edit-art-y"
         };
+        // Custom art framing (CSV columns Art_Zoom, Art_X, Art_Y in %); an empty cell means the default
+        var ART_DEFAULTS = { "Art_Zoom": 100, "Art_X": 50, "Art_Y": 50 };
 
         // ===== Balancing notes (CSV columns Note / Note_Priority: 1 important, 2 potential problem, 3 suggestion) =====
         var NOTE_PRIORITIES = { "1": "Important", "2": "Potential problem", "3": "Suggestion" };
@@ -582,15 +603,44 @@
             });
             return areaBgCache[key];
         }
+        // Zoom 100% = the picture just covers the art layer (750 x 1100); X / Y = which part shows (CSS background-position %)
+        var artSizeCache = {};
+        function artNaturalSize(url) {
+            if (!artSizeCache[url]) artSizeCache[url] = new Promise(function(resolve) {
+                var img = new Image();
+                img.onload = function() { resolve({ w: img.naturalWidth, h: img.naturalHeight }); };
+                img.onerror = function() { resolve(null); };
+                img.src = url;
+            });
+            return artSizeCache[url];
+        }
+        function artValue(p, col) { var v = parseFloat(p[col]); return isNaN(v) ? ART_DEFAULTS[col] : v; }
+        function applyCustomArt(url, p) {
+            var $bg = $(".card_bg"), zoom = artValue(p, "Art_Zoom"), x = artValue(p, "Art_X"), y = artValue(p, "Art_Y");
+            $bg.css({ "background-image": "url('" + url + "')", "background-position": x + "% " + y + "%" });
+            artNaturalSize(url).then(function(size) {
+                if (!size) { $bg.css("background-size", "cover"); return; }
+                var layer = $bg[0], cover = Math.max(layer.offsetWidth / size.w, layer.offsetHeight / size.h) * zoom / 100;
+                $bg.css("background-size", Math.round(size.w * cover) + "px " + Math.round(size.h * cover) + "px");
+            });
+        }
+
         function setCardBackground(p, type1, type2) {
+            var art = String(p.Custom_Art || "").trim();
+            if (art) { // custom full art wins over the area picture
+                $(".card_content").addClass("area-bg").css("background-image", "none");
+                applyCustomArt(customArtUrl(art), p);
+                return;
+            }
             var t1 = String(type1 || "").trim(), t2 = String(type2 || "").trim();
             var names = t2 && t2 !== t1 ? [t1 + "_" + t2, t2 + "_" + t1] : [t1];
             findAreaImage(names).then(function(url) {
                 if (aPokemonData[curIndex] !== p && aPokemonData[curIndex].ID !== p.ID) return; // another card was opened meanwhile
+                if (String(aPokemonData[curIndex].Custom_Art || "").trim()) return; // custom art was added meanwhile
                 var $c = $(".card_content");
                 // The picture covers the same inner rectangle as the old backgrounds (x 30-780, y 0-1100), so the
                 // card's rounded corners outside the frame stay black
-                if (url) { $c.addClass("area-bg").css("background-image", "none"); $(".card_bg").css("background-image", "url('" + url + "')"); }
+                if (url) { $c.addClass("area-bg").css("background-image", "none"); $(".card_bg").css({ "background-image": "url('" + url + "')", "background-size": "", "background-position": "" }); }
                 else $c.removeClass("area-bg").css({ "background-image": "url('img/background/" + t1 + ".jpg')", "background-size": "750px 1100px", "background-position": "30px 0" });
             });
         }
@@ -634,7 +684,7 @@
                 $("#edit-points").val(defaultPoints(r));
                 $("#edit-cost").val(defaultCost(r, t1, t2));
             });
-            $(".edit-panel").on("input change", "input, select, textarea", function() {
+            $(".edit-panel").on("input change", "input:not([type=file]), select, textarea", function() {
                 $("#effect-length").text($("#edit-ability-effect").val().length);
                 $(".save-status").text("Unsaved changes").attr("class", "save-status dirty");
                 renderCard(readEditForm());
@@ -643,6 +693,18 @@
             $("#save-btn").on("click", function() { saveCurrentCard(false); });
             $("#save-resolve-btn").on("click", function() { saveCurrentCard(true); });
             $("#resolve-note-btn").on("click", resolveNote);
+            $("#upload-art-btn").on("click", function() { $("#upload-art-input").val("").trigger("click"); });
+            $("#upload-art-input").on("change", function() { if (this.files[0]) uploadCustomArt(this.files[0]); });
+            $("#clear-art-btn").on("click", clearCustomArt);
+            $(".art-adjust").on("input", "input[type=range]", showArtValues);
+            $("#reset-art-btn").on("click", function() {
+                resetArtFraming();
+                $(".save-status").text("Unsaved changes").attr("class", "save-status dirty");
+                renderCard(readEditForm());
+            });
+            $(".art-row").on("dragover", function(e) { e.preventDefault(); $(this).addClass("dragging"); })
+                .on("dragleave drop", function() { $(this).removeClass("dragging"); })
+                .on("drop", function(e) { e.preventDefault(); var f = e.originalEvent.dataTransfer.files[0]; if (f) uploadCustomArt(f); });
             buildSymbolReference();
             // Remember whether the Edit Card panel is open or collapsed
             var editPanel = document.querySelector(".edit-panel");
@@ -660,6 +722,8 @@
                 }
                 $el.val(v);
             });
+            $.each(ART_DEFAULTS, function(col, def) { $(FORM_FIELDS[col]).val(p[col] !== undefined && p[col] !== "" ? p[col] : def); });
+            showArtValues();
             $("#effect-length").text((p.Ability_R_Effect || "").length);
             $(".save-status").text("").attr("class", "save-status");
             showBalanceNote(p);
@@ -670,6 +734,9 @@
             $.each(FORM_FIELDS, function(col, sel) {
                 p[col] = String($(sel).val() || "").replace(/\r?\n/g, " ").trim();
             });
+            // framing only matters with custom art; defaults are stored as empty cells
+            var hasArt = String(p.Custom_Art || "").trim() !== "";
+            $.each(ART_DEFAULTS, function(col, def) { if (!hasArt || Number(p[col]) === def) p[col] = ""; });
             return p;
         }
 
@@ -690,20 +757,94 @@
             });
         }
 
-        // Returns a writable handle to data/data_r.csv (asks for the Generator folder once, then remembers it)
-        async function getCsvHandle() {
+        // The Generator folder (asked for once, then remembered); checked by looking for data/data_r.csv
+        async function getGeneratorDir() {
             if (!window.showDirectoryPicker) throw new Error("This browser cannot write files. Use Chrome or Edge.");
             var dir = await idb("readonly", function(s) { return s.get("dir"); });
             if (dir && (await dir.requestPermission({ mode: "readwrite" })) === "granted") {
-                try { return await (await dir.getDirectoryHandle("data")).getFileHandle("data_r.csv"); } catch (e) {}
+                try { await (await dir.getDirectoryHandle("data")).getFileHandle("data_r.csv"); return dir; } catch (e) {}
             }
-            alert("Pick the Generator folder (the one containing index_r.html) so the page can save data/data_r.csv.");
+            alert("Pick the Generator folder (the one containing index_r.html) so the page can save files there.");
             dir = await window.showDirectoryPicker({ mode: "readwrite" });
-            var fh;
-            try { fh = await (await dir.getDirectoryHandle("data")).getFileHandle("data_r.csv"); }
+            try { await (await dir.getDirectoryHandle("data")).getFileHandle("data_r.csv"); }
             catch (e) { throw new Error("That folder has no data/data_r.csv. Pick the Generator folder itself."); }
             await idb("readwrite", function(s) { return s.put(dir, "dir"); });
-            return fh;
+            return dir;
+        }
+
+        // Returns a writable handle to data/data_r.csv
+        async function getCsvHandle() {
+            return (await (await getGeneratorDir()).getDirectoryHandle("data")).getFileHandle("data_r.csv");
+        }
+
+        // ===== Custom art (CSV column Custom_Art = file name in img/custom/) =====
+        // A full art picture for one card: it replaces the background and the sprite is hidden.
+        var artVersions = {}; // file name -> time of the last upload, so the browser shows the new picture
+        function customArtUrl(file) { return "img/custom/" + encodeURIComponent(file) + (artVersions[file] ? "?v=" + artVersions[file] : ""); }
+        var ART_EXT = { "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif" };
+
+        function showCustomArtRow(p) {
+            var file = String(p.Custom_Art || "").trim();
+            $("#art-name").text(file ? "img/custom/" + file : "none");
+            $("#clear-art-btn").prop("disabled", !file);
+            $(".art-adjust").prop("hidden", !file);
+            $("#art-status").text("").attr("class", "art-status");
+        }
+
+        function showArtValues() {
+            $("#art-zoom-val").text($("#edit-art-zoom").val() + "%");
+            $("#art-x-val").text($("#edit-art-x").val() + "%");
+            $("#art-y-val").text($("#edit-art-y").val() + "%");
+        }
+        function resetArtFraming() { $.each(ART_DEFAULTS, function(col, def) { $(FORM_FIELDS[col]).val(def); }); showArtValues(); }
+
+        async function customArtDir() {
+            return (await (await getGeneratorDir()).getDirectoryHandle("img", { create: true })).getDirectoryHandle("custom", { create: true });
+        }
+
+        async function uploadCustomArt(file) {
+            var ext = ART_EXT[file.type];
+            if (!ext) { alert("Please choose a JPEG, PNG, WebP or GIF picture."); return; }
+            var p = aPokemonData[curIndex];
+            var fileName = (String(dexNumber(p)).padStart(4, "0") + " " + p.Name).replace(/[\\/:*?"<>|]/g, "") + ext;
+            var oldName = String(p.Custom_Art || "").trim();
+            var $st = $("#art-status").text("uploading…").attr("class", "art-status");
+            try {
+                var dir = await customArtDir();
+                var w = await (await dir.getFileHandle(fileName, { create: true })).createWritable();
+                await w.write(file); await w.close();
+                if (oldName && oldName !== fileName) { try { await dir.removeEntry(oldName); } catch (e) {} } // replaced picture
+                await writeCsvRow(p.ID, { "Custom_Art": fileName, "Art_Zoom": "", "Art_X": "", "Art_Y": "" });
+                p.Custom_Art = fileName; p.Art_Zoom = p.Art_X = p.Art_Y = "";
+                resetArtFraming(); // a new picture starts filled and centred
+                artVersions[fileName] = Date.now();
+                renderCard(readEditForm());
+                showCustomArtRow(p);
+                $("#art-status").text("saved ✓").attr("class", "art-status ok");
+            } catch (e) {
+                if (e.name === "AbortError") { $st.text(""); return; }
+                $st.text("upload failed: " + e.message).attr("class", "art-status error");
+            }
+        }
+
+        async function clearCustomArt() {
+            var p = aPokemonData[curIndex], fileName = String(p.Custom_Art || "").trim();
+            if (!fileName) return;
+            if (!confirm("Delete the custom art img/custom/" + fileName + " for " + p.Name + "?\nThe file is removed from your Generator folder and can't be recovered.")) return;
+            var $st = $("#art-status").text("deleting…").attr("class", "art-status");
+            try {
+                var dir = await customArtDir();
+                try { await dir.removeEntry(fileName); } catch (e) { if (e.name !== "NotFoundError") throw e; }
+                await writeCsvRow(p.ID, { "Custom_Art": "", "Art_Zoom": "", "Art_X": "", "Art_Y": "" });
+                p.Custom_Art = ""; p.Art_Zoom = p.Art_X = p.Art_Y = "";
+                resetArtFraming();
+                renderCard(readEditForm());
+                showCustomArtRow(p);
+                $("#art-status").text("cleared ✓").attr("class", "art-status ok");
+            } catch (e) {
+                if (e.name === "AbortError") { $st.text(""); return; }
+                $st.text("clear failed: " + e.message).attr("class", "art-status error");
+            }
         }
 
         // Re-reads data_r.csv from disk and changes only the given columns of one row, so edits made elsewhere are kept

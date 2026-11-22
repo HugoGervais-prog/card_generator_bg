@@ -879,6 +879,59 @@ h2 {
 .note_p2 { background-color: #f5d02f; } /* 2 - Potential problem */
 .note_p3 { background-color: #3b8bff; } /* 3 - Suggestion */
 
+/* Custom art row in the Edit Card form */
+.art-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background-color: #1e1e24;
+    border: 1px solid #4a4a5a;
+}
+.art-row.dragging { border: 1px dashed #f5d02f; background-color: #2b2b20; }
+.art-row-label { font-size: 13px; font-weight: 700; color: #a0a0b0; text-transform: uppercase; letter-spacing: 0.05em; }
+#art-name { font-family: Consolas, monospace; font-size: 13px; color: #f5d02f; word-break: break-all; }
+.art-status { font-size: 12px; }
+.art-status.ok { color: #2ebf5c; }
+.art-status.error { color: #ff6b5a; }
+#upload-art-btn, #clear-art-btn {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+}
+#upload-art-btn { margin-left: auto; background-color: #2a7fd4; }
+#upload-art-btn:hover { background-color: #3b8bff; }
+#clear-art-btn { background-color: #4a4a5a; }
+#clear-art-btn:hover:not(:disabled) { background-color: #c0392b; }
+#clear-art-btn:disabled { opacity: 0.4; cursor: default; }
+.art-hint { flex-basis: 100%; font-size: 12px; color: #777; }
+.art-adjust {
+    flex-basis: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    align-items: end;
+    gap: 8px 14px;
+    padding-top: 8px;
+    border-top: 1px solid #3a3a48;
+}
+.art-adjust[hidden] { display: none; }
+.art-adjust label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; color: #a0a0b0; text-transform: uppercase; }
+.art-adjust output { color: #f5d02f; font-weight: 700; text-transform: none; }
+.art-adjust input[type=range] { width: 100%; accent-color: #f5d02f; }
+.art-adjust .art-hint { grid-column: 1 / -1; }
+#reset-art-btn {
+    font-family: inherit; font-size: 13px; font-weight: bold; padding: 7px 12px;
+    border: none; border-radius: 8px; cursor: pointer; color: white; background-color: #4a4a5a;
+}
+#reset-art-btn:hover { background-color: #5a5a6c; }
+
 /* Roster title with previous / next arrows on the right */
 .roster-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .roster-nav { display: flex; gap: 8px; }
