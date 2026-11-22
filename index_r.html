@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-    <link href="css/style_r.css?v=8" rel="stylesheet">
+    <link href="css/style_r.css?v=10" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="css/dashboard.css?v=6" rel="stylesheet">
 
@@ -75,17 +75,7 @@
         </div>
 
         <div class="sidebar-section">
-            <div class="control-panel">
-                <h2>Generator Controls</h2>
-                <div class="control-group">
-                    <select id="menu_pokemon">
-                        <option></option>
-                    </select>
-                    <p class="total">0 / 0 sheets</p>
-                </div>
-                <button id="download-btn">Download Image</button>
-                <p class="help-text">Make sure browser zoom is at 100% before downloading.</p>
-            </div>
+            <button id="download-btn"><i class="bi bi-download"></i> Download Image</button>
 
             <details class="edit-panel" open>
                 <summary><h2>Edit Card</h2></summary>
@@ -126,7 +116,13 @@
             </details>
 
             <div class="roster-panel">
-                <h2>Pokémon Roster</h2>
+                <div class="roster-header">
+                    <h2>Pokémon Roster</h2>
+                    <div class="roster-nav">
+                        <button type="button" id="prev-pokemon" title="Previous Pokémon" aria-label="Previous Pokémon"><i class="bi bi-chevron-left"></i></button>
+                        <button type="button" id="next-pokemon" title="Next Pokémon" aria-label="Next Pokémon"><i class="bi bi-chevron-right"></i></button>
+                    </div>
+                </div>
                 <p class="note-legend"></p>
                 <div class="button_table">
                     </div>
@@ -160,6 +156,8 @@
                         document.body.appendChild(link);
                         link.click();
                         document.body.removeChild(link);
+
+                        goToNextPokemon(); // ready for the next download
                     } catch (err) {
                         console.error("Erreur lors de l'exportation de l'image :", err);
                         alert("Impossible de capturer l'image à cause de restrictions de sécurité sur certaines ressources (CORS).");
@@ -267,6 +265,67 @@
             curIndex = index;
             fillEditForm(aPokemonData[index]);
             renderCard(aPokemonData[index]);
+            fitRosterToCard(); // the balancing note box changes the edit panel's height
+            selectRosterButton(aPokemonData[index].ID);
+        }
+
+        // The roster panel ends flush with the bottom of the card preview: the grid gets whatever height is left
+        // under the download button and edit panel. When the sidebar wraps below the card, the CSS max-height applies.
+        var ROSTER_MIN_H = 160;
+        function fitRosterToCard() {
+            var card = document.querySelector(".card-section"), panel = document.querySelector(".roster-panel"),
+                grid = document.querySelector(".button_table");
+            if (!card || !panel || !grid) return;
+            var c = card.getBoundingClientRect(), pr = panel.getBoundingClientRect();
+            if (pr.left < c.right) { grid.style.height = ""; grid.style.maxHeight = ""; return; } // not beside the card
+            var g = grid.getBoundingClientRect();
+            var under = pr.bottom - g.bottom; // panel padding + border below the grid
+            grid.style.maxHeight = "none";
+            grid.style.height = Math.max(ROSTER_MIN_H, c.bottom - g.top - under) + "px";
+        }
+        $(function() {
+            $(window).on("resize", fitRosterToCard);
+            $(".edit-panel").on("toggle", fitRosterToCard);
+            if (window.ResizeObserver) {
+                var ro = new ResizeObserver(fitRosterToCard);
+                [".card-section", ".edit-panel", "#download-btn"].forEach(function(sel) { var el = document.querySelector(sel); if (el) ro.observe(el); });
+            }
+            fitRosterToCard();
+        });
+
+        // Opens the card at a row of aPokemonData, keeping the menu and the ?id= in the URL in step
+        function openPokemonAt(index) {
+            var p = aPokemonData[index];
+            if (!p) return;
+            $("#menu_pokemon").val(p.ID);
+            var url = new URL(window.location);
+            url.searchParams.set("id", p.ID);
+            window.history.replaceState({}, "", url);
+            loadPokemonData(index);
+        }
+
+        // Next / previous Pokémon in the list (skips empty placeholder rows); stays put at either end
+        function goToNextPokemon() { stepPokemon(1); }
+        function goToPrevPokemon() { stepPokemon(-1); }
+        function stepPokemon(dir) {
+            for (var i = curIndex + dir; i >= 0 && i < aPokemonData.length; i += dir) {
+                if (aPokemonData[i].Name && aPokemonData[i].Name.trim() !== "") { openPokemonAt(i); return; }
+            }
+        }
+        $(function() {
+            $("#prev-pokemon").on("click", goToPrevPokemon);
+            $("#next-pokemon").on("click", goToNextPokemon);
+        });
+
+        // Yellow outline on the selected Pokémon's button; scroll the roster grid (not the page) to it if it's out of view
+        function selectRosterButton(id) {
+            var $btn = $(".pokemon_button").removeClass("active").filter('[id="' + id + '"]').addClass("active");
+            var grid = document.querySelector(".button_table");
+            if (!$btn.length || !grid) return;
+            var g = grid.getBoundingClientRect(), r = $btn[0].getBoundingClientRect();
+            if (r.top < g.top || r.bottom > g.bottom) {
+                grid.scrollTop += (r.top - g.top) - (grid.clientHeight - r.height) / 2; // centre it in the grid
+            }
         }
 
         // Sizes the ability box to its text. The box's bottom edge stays just above the points bar and it grows upward;

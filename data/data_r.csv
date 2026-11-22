@@ -91,15 +91,15 @@ ID,Name,Rarity,Type1,Type2,Ability_R_Name,Ability_R_Effect,Sheet,Points,Cost,Not
 75,Graveler,A,Rock,Ground,,,,6,{2}{ROC}{ROC}{GRD},,,,,1,105,Mineral,Stage 1,74
 10110,Alolan Graveler,A,Rock,Electric,,,,6,{2}{ROC}{ROC}{ELE},,,Alola,0075 Graveler Alola,1,110,Mineral,Stage 1,10109
 76,Golem,E,Rock,Ground,Sturdy,Rock-type Pokémon adjacent to this Pokémon cost {ROC} less to capture.,,9,{3}{ROC}{ROC}{GRD}{GRD},,,,,1.4,300,Mineral,Stage 2,75
-10111,Alolan Golem,E,Rock,Electric,,,,9,{3}{ROC}{ROC}{ELE}{ELE},,,Alola,0076 Golem Alola,1.7,316,Mineral,Stage 2,10110
+10111,Alolan Golem,E,Rock,Electric,Magnet Pull,+3 for each adjacent Steel-type or Electric-type Pokémon.,,9,{3}{ROC}{ROC}{ELE}{ELE},,,Alola,0076 Golem Alola,1.7,316,Mineral,Stage 2,10110
 77,Ponyta,I,Fire,,,,,3,{2}{FIR},,,,,1,30,Field,Basic,
 10162,Galarian Ponyta,I,Psychic,,,,,3,{2}{PSY},,,Galar,0077 Ponyta Galar,0.8,24,Field,Basic,
 78,Rapidash,E,Fire,,Flame Body,Fire-type Pokémon adjacent to this Pokémon cost {FIR} less to capture.,,9,{4}{FIR}{FIR}{FIR},,,,,1.7,95,Field,Stage 1,77
-10163,Galarian Rapidash,E,Psychic,Fairy,,,,9,{3}{PSY}{PSY}{FAR}{FAR},,,Galar,0078 Rapidash Galar,1.7,80,Field,Stage 1,10162
+10163,Galarian Rapidash,E,Psychic,Fairy,Anticipation,"When you take the Research action, you may look at the top 2 cards of the Thesis deck and claim 1 of them instead of a market card. Return the other to the top.",,9,{3}{PSY}{PSY}{FAR}{FAR},,,Galar,0078 Rapidash Galar,1.7,80,Field,Stage 1,10162
 79,Slowpoke,B,Water,Psychic,,,,1,{WAT}{PSY},,,,,1.2,36,Monster / Water 1,Basic,
 10164,Galarian Slowpoke,B,Psychic,,,,,1,{1}{PSY},,,Galar,0079 Slowpoke Galar,1.2,36,Monster / Water 1,Basic,
 80,Slowbro,A,Water,Psychic,Regenerator,Water-type Pokémon added to this Pokémon's row cost {WAT} less to capture.,,6,{2}{WAT}{WAT}{PSY},,,,,1.6,78.5,Monster / Water 1,Stage 1,79
-10165,Galarian Slowbro,A,Poison,Psychic,,,,6,{2}{POS}{POS}{PSY},,,Galar,0080 Slowbro Galar,1.6,70.5,Monster / Water 1,Stage 1,10164
+10165,Galarian Slowbro,A,Poison,Psychic,Quick Draw,"Once per game, at the start of an opponent's turn, you may take the Explore action.",,6,{2}{POS}{POS}{PSY},,,Galar,0080 Slowbro Galar,1.6,70.5,Monster / Water 1,Stage 1,10164
 81,Magnemite,B,Electric,Steel,,,,1,{ELE}{STE},,,,,0.3,6,Mineral,Basic,
 82,Magneton,A,Electric,Steel,,,10,6,{2}{ELE}{ELE}{STE},,,,,1,60,Mineral,Stage 1,81
 83,Farfetch'd,I,Normal,Flying,,,,3,{1}{NOR}{FLY},,,,,0.8,15,Flying / Field,Basic,
@@ -111,7 +111,7 @@ ID,Name,Rarity,Type1,Type2,Ability_R_Name,Ability_R_Effect,Sheet,Points,Cost,Not
 88,Grimer,B,Poison,,,,,1,{1}{POS},,,,,0.9,30,Amorphous,Basic,
 10112,Alolan Grimer,B,Poison,Dark,,,,1,{POS}{DRK},,,Alola,0088 Grimer Alola,0.7,42,Amorphous,Basic,
 89,Muk,A,Poison,,Poison Touch,"The Pokémon directly above and below this Pokémon count as Poison-type for all ability effects, unless they are Steel-type. This does not count for Thesis scoring.",,6,{3}{POS}{POS},,,,,1.2,30,Amorphous,Stage 1,88
-10113,Alolan Muk,A,Poison,Dark,,,,6,{2}{POS}{POS}{DRK},,,Alola,0089 Muk Alola,1,52,Amorphous,Stage 1,10112
+10113,Alolan Muk,A,Poison,Dark,Gluttony,"When you take the Rest action, you may also take the top card of the Area deck.",,6,{2}{POS}{POS}{DRK},,,Alola,0089 Muk Alola,1,52,Amorphous,Stage 1,10112
 90,Shellder,B,Water,,,,,1,{1}{WAT},,,,,0.3,4,Water 3,Basic,
 91,Cloyster,A,Water,Ice,Shell armor,Counts as a Rock-type Pokémon for all ability effects.,11,6,{1}{WAT}{WAT}{ICE},,,,,1.5,132.5,Water 3,Stage 1,90
 92,Gastly,B,Ghost,Poison,,,,1,{GHO}{POS},,,,,1.3,0.1,Amorphous,Basic,
@@ -125,10 +125,10 @@ ID,Name,Rarity,Type1,Type2,Ability_R_Name,Ability_R_Effect,Sheet,Points,Cost,Not
 100,Voltorb,B,Electric,,,,12,1,{1}{ELE},,,,,0.5,10.4,Mineral,Basic,
 10231,Hisuian Voltorb,B,Electric,Grass,,,,1,{ELE}{GRA},,,Hisui,0100 Voltorb Hisui,0.5,13,Mineral,Basic,
 101,Electrode,A,Electric,,Static,+1 to each Electric-type Pokémon adjacent to this Pokémon.,,6,{3}{ELE}{ELE},,,,,1.2,66.6,Mineral,Stage 1,100
-10232,Hisuian Electrode,A,Electric,Grass,,,,6,{2}{ELE}{ELE}{GRA},,,Hisui,0101 Electrode Hisui,1.2,71,Mineral,Stage 1,10231
+10232,Hisuian Electrode,A,Electric,Grass,Aftermath,"Once per game, during your turn, you may discard all Areas in the market and refill it.",,6,{2}{ELE}{ELE}{GRA},,,Hisui,0101 Electrode Hisui,1.2,71,Mineral,Stage 1,10231
 102,Exeggcute,B,Grass,Psychic,,,,1,{GRA}{PSY},,,,,0.4,2.5,Grass,Basic,
 103,Exeggutor,A,Grass,Psychic,Harvest,Grass-type Pokémon added to this Pokémon's row cost {GRA} less to capture.,,6,{2}{GRA}{GRA}{PSY},,,,,2,120,Grass,Stage 1,102
-10114,Alolan Exeggutor,A,Grass,Dragon,,,,6,{2}{GRA}{GRA}{DRG},,,Alola,0103 Exeggutor Alola,10.9,415.6,Grass,Stage 1,102
+10114,Alolan Exeggutor,A,Grass,Dragon,Towering,+1 for each other Pokémon in this Pokémon's row and column that is 1.5 m or taller.,,6,{2}{GRA}{GRA}{DRG},,,Alola,0103 Exeggutor Alola,10.9,415.6,Grass,Stage 1,102
 104,Cubone,B,Ground,,,,,1,{1}{GRD},,,,,0.4,6.5,Monster,Basic,
 105,Marowak,A,Ground,,Rock Head,+4 to any Rock-type Pokémon placed directly above this Pokémon.,,6,{3}{GRD}{GRD},,,,,1,45,Monster,Stage 1,104
 10115,Alolan Marowak,A,Fire,Ghost,,,,6,{2}{FIR}{FIR}{GHO},,,Alola,0105 Marowak Alola,1,34,Monster,Stage 1,104

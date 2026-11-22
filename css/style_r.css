@@ -177,6 +177,12 @@ h2 {
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
+/* Selected Pokémon */
+.pokemon_button.active {
+    border-color: #f5d02f;
+    box-shadow: 0 0 0 2px #f5d02f, 0 0 12px rgba(245, 208, 47, 0.6);
+}
+
 .pokemon_button img {
     width: 90%;
     height: 90%;
@@ -851,6 +857,23 @@ h2 {
 .note_p2 { background-color: #f5d02f; } /* 2 - Potential problem */
 .note_p3 { background-color: #3b8bff; } /* 3 - Suggestion */
 
+/* Roster title with previous / next arrows on the right */
+.roster-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.roster-nav { display: flex; gap: 8px; }
+.roster-nav button {
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 8px;
+    background-color: #4a4a5a;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.roster-nav button:hover { background-color: #f5d02f; color: #1e1e24; }
 .note-legend {
     display: flex;
     gap: 16px;
