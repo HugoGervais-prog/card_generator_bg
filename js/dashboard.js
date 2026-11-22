@@ -158,11 +158,62 @@
         }), { title: "Areas vs area-cost demand" });
     }
 
+    // Bar chart of a numeric CSV column split into ranges; edges = upper bounds, the last range is "edge+"
+    function histogramPanel(root, data, title, sub, col, unit, edges) {
+        var vals = data.map(function (d) { return parseFloat(d.p[col]); }).filter(function (v) { return !isNaN(v); });
+        var $p = panel(root, title, sub);
+        if (!vals.length) { $p.append('<p class="dash-sub">No values in the CSV yet.</p>'); return; }
+        var bins = edges.map(function (e, i) { return { lo: i ? edges[i - 1] : null, hi: e, n: [] }; }).concat([{ lo: edges[edges.length - 1], hi: null, n: [] }]);
+        data.forEach(function (d) {
+            var v = parseFloat(d.p[col]); if (isNaN(v)) return;
+            for (var i = 0; i < bins.length; i++) if (bins[i].hi === null || v < bins[i].hi) { bins[i].n.push(d); break; }
+        });
+        vbars(chartBox($p), bins.map(function (bn) {
+            var lab = bn.lo === null ? "<" + bn.hi : bn.hi === null ? bn.lo + "+" : bn.lo + "–" + bn.hi;
+            var big = bn.n.slice().sort(function (a, b) { return parseFloat(b.p[col]) - parseFloat(a.p[col]); })[0];
+            return {
+                label: lab, segs: [{ v: bn.n.length, color: C.s1 }],
+                tip: "<b>" + esc(lab) + " " + unit + "</b>: " + bn.n.length + " Pokémon (" + Math.round(100 * bn.n.length / vals.length) + "%)" +
+                     (big ? "<br><span class='dt-muted'>Biggest: " + esc(big.name) + " (" + big.p[col] + " " + unit + ")</span>" : "")
+            };
+        }), { title: title, height: 180 });
+    }
+
     // ---------- chart builders ----------
-    function panel(root, title, sub) {
-        var $p = $('<div class="dash-panel"></div>').appendTo(root);
-        $p.append($("<h3>").text(title));
+    // Every chart panel is collapsible (a <details>). Collapsed panels are remembered in localStorage by `key`
+    // (the title by default; pass a fixed key when the title holds a changing number).
+    var COLLAPSE_KEY = "dashCollapsed";
+    // Bootstrap Icons (https://icons.getbootstrap.com/) shown before each panel title, by panel key
+    var PANEL_ICONS = {
+        "Open balancing notes": "bi-flag-fill",
+        "Points vs area cost": "bi-graph-up-arrow",
+        "Rarity spread": "bi-gem",
+        "Points per area cost": "bi-coin",
+        "Type appearances": "bi-tags-fill",
+        "Type appearances in areas": "bi-map",
+        "Areas vs roster": "bi-arrow-left-right",
+        "Areas vs area-cost demand": "bi-bar-chart-steps",
+        "Pokémon by region": "bi-globe-americas",
+        "Weight distribution": "bi-box-seam",
+        "Height distribution": "bi-rulers",
+        "Egg groups": "bi-egg-fill"
+    };
+    function icon(name) { return name ? '<i class="bi ' + name + ' dash-icon" aria-hidden="true"></i>' : ""; }
+    function collapsedSet() { try { return JSON.parse(localStorage.getItem(COLLAPSE_KEY)) || []; } catch (e) { return []; } }
+    function panel(root, title, sub, key) {
+        key = key || title;
+        var closed = collapsedSet().indexOf(key) >= 0;
+        var $p = $('<details class="dash-panel dash-collapsible"></details>').prop("open", !closed).appendTo(root);
+        $p.append($("<summary>").append($("<h3>").html(icon(PANEL_ICONS[key])).append(document.createTextNode(title))));
         if (sub) $p.append($('<p class="dash-sub">').text(sub));
+        $p.on("toggle", function () {
+            var set = collapsedSet(), was = set.indexOf(key) >= 0, now = !this.open;
+            if (was === now) return; // the initial open state, not a click
+            set = set.filter(function (k) { return k !== key; });
+            if (now) set.push(key);
+            localStorage.setItem(COLLAPSE_KEY, JSON.stringify(set));
+            if (this.open) redraw(); // charts drawn while collapsed had no width; draw them again at full size
+        });
         return $p;
     }
     function legend($p, entries) {
@@ -304,7 +355,7 @@
 
         // Headline tiles
         var $head = $('<div class="dash-panel"></div>').appendTo(root);
-        $head.append("<h2>Roster Dashboard</h2>");
+        $head.append("<h2>" + icon("bi-speedometer2") + "Roster Dashboard</h2>");
         var n = data.length;
         var avg = function (f) { return n ? data.reduce(function (a, d) { return a + f(d); }, 0) / n : 0; };
         var notes = { "1": 0, "2": 0, "3": 0 };
@@ -330,7 +381,7 @@
             ["Thesis sheets", thesisCount, PER_SHEET.thesis]
         ];
         var exact = 0, whole = 0, ready = true;
-        $head.append('<h3 class="dash-subhead">Print sheets</h3>');
+        $head.append('<h3 class="dash-subhead">' + icon("bi-printer") + 'Print sheets</h3>');
         var $sheets = $('<div class="dash-tiles"></div>').appendTo($head);
         sheetRows.forEach(function (r) {
             var known = r[1] != null, sh = known ? r[1] / r[2] : 0;
@@ -342,9 +393,9 @@
             '</span><span class="dt-foot">' + (ready ? "all card types<br>" + whole + " to print" : "loading") + "</span></div>");
 
         // Open notes, right under the headline panel
-        var $n = panel(root, "Open balancing notes", "");
         var list = $.grep(aPokemonData, function (p) { return notePriority(p); })
             .sort(function (a, b) { return (String(a.Note_Priority) || "9").localeCompare(String(b.Note_Priority) || "9") || a.ID - b.ID; });
+        var $n = panel(root, "Open balancing notes (" + list.length + ")", "", "Open balancing notes");
         if (!list.length) $n.append('<p class="dash-sub">No open notes.</p>');
         list.forEach(function (p) {
             var pr = notePriority(p);
@@ -440,6 +491,28 @@
             var c = data.filter(function (d) { return d.region === rg; }).length;
             return { label: rg.slice(0, 3), segs: [{ v: c, color: C.s1 }], tip: "<b>" + rg + "</b>: " + c + " Pokémon" };
         }), { title: "Pokémon by region", height: 170 });
+
+        // Size and egg groups (CSV columns Weight_kg, Height_m, Egg_Groups)
+        histogramPanel(root, data, "Weight distribution", "How many Pokémon fall in each weight range. Ranges get wider as weights grow.",
+            "Weight_kg", "kg", [5, 15, 30, 60, 100, 200]);
+        histogramPanel(root, data, "Height distribution", "How many Pokémon fall in each height range.",
+            "Height_m", "m", [0.5, 1, 1.5, 2, 3]);
+
+        var eggCount = {}, eggOnly = {};
+        data.forEach(function (d) {
+            var groups = String(d.p.Egg_Groups || "").split("/").map(function (g) { return g.trim(); }).filter(Boolean);
+            groups.forEach(function (g) {
+                eggCount[g] = (eggCount[g] || 0) + 1;
+                if (groups.length === 1) eggOnly[g] = (eggOnly[g] || 0) + 1;
+            });
+        });
+        var eggNames = Object.keys(eggCount).sort(function (a, b) { return eggCount[b] - eggCount[a]; });
+        var $eg = panel(root, "Egg groups", "How many Pokémon are in each egg group. A Pokémon with two groups counts in both.");
+        if (!eggNames.length) $eg.append('<p class="dash-sub">No egg groups in the CSV yet.</p>');
+        else hbars(chartBox($eg), eggNames.map(function (g) {
+            return { label: g, segs: [{ v: eggCount[g], color: C.s1 }],
+                     tip: "<b>" + esc(g) + "</b>: " + eggCount[g] + " Pokémon<br>" + (eggOnly[g] || 0) + " have only this group" };
+        }), { title: "Egg groups" });
     };
 
     $(function () {

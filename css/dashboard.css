@@ -23,6 +23,31 @@
     color: #ffffff;
     letter-spacing: 0.02em;
 }
+/* Collapsible chart panels (all except the Roster Dashboard headline panel) */
+.dash-collapsible > summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    user-select: none;
+}
+.dash-collapsible > summary::-webkit-details-marker { display: none; }
+.dash-collapsible > summary h3 { margin: 0; }
+.dash-collapsible > summary::after {
+    content: "\25BE"; /* ▾ */
+    font-size: 18px;
+    color: #a0a0b0;
+    transition: transform 0.2s;
+}
+.dash-collapsible:not([open]) > summary::after { transform: rotate(-90deg); }
+.dash-collapsible > summary:hover::after { color: #f5d02f; }
+.dash-collapsible[open] > summary { margin-bottom: 4px; }
+.dash-collapsible:not([open]) { padding-top: 14px; padding-bottom: 14px; }
+/* Bootstrap icon before each dashboard title */
+.dash-icon { margin-right: 8px; color: #f5d02f; font-size: 0.95em; }
+.dash-subhead .dash-icon { color: #a0a0b0; }
 .dash-sub { margin: 0 0 10px; font-size: 13px; color: #a0a0b0; line-height: 1.35; }
 .dash-chart { width: 100%; }
 .dash-chart svg { display: block; font-family: "Roboto Condensed", sans-serif; overflow: visible; }
