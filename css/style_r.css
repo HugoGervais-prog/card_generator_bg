@@ -210,6 +210,23 @@ h2 {
     background-position-x: 85px;
     position: relative;
 }
+/* Area picture background: its own layer behind the frame, covering the same art rectangle as the old
+   backgrounds (x 30-780, y 0-1100) so the card's rounded corners stay black. z-index 0 on the card makes the
+   card its own stacking context, so the layer's z-index -1 puts it under the frame but above the card's backdrop. */
+.card_content { z-index: 0; }
+.card_bg {
+    display: none;
+    position: absolute;
+    left: 30px;
+    top: 0;
+    width: 750px;
+    height: 1100px;
+    z-index: -1;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.card_content.area-bg .card_bg { display: block; }
 .card_name {
     color: white;
     position: absolute;

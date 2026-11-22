@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-    <link href="css/style_r.css?v=12" rel="stylesheet">
+    <link href="css/style_r.css?v=14" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="css/dashboard.css?v=6" rel="stylesheet">
 
@@ -30,6 +30,7 @@
         
         <div class="card-section">
             <div class="card_content" id="capture">
+                <div class="card_bg"></div>
 
                 <div class="portrait_box">
                     <img class="card_portrait" src="img/sprite/0001 Bulbasaur.png">
@@ -426,7 +427,7 @@
             $(".p1_type").attr("src", "img/type/" + type1 + ".png");
             $(".c1_type").attr("src", "img/type/" + type1 + ".png");
 
-            $(".card_content").css("background-image", "url('../img/background/" + type1 + ".jpg')");
+            setCardBackground(p, type1, type2);
             $(".card_content").css("width", "810px");
             $(".card_content").css("height", "1110px");
             $(".card_content").css("background-repeat", "no-repeat");
@@ -564,6 +565,36 @@
         }
 
         // Draws "{2}{WAT}{FIR}" left to right, right-aligned in the top-right corner of the card
+        // ===== Card background: the area picture for the card's types =====
+        // Dual type: img/area/Type1_Type2.jpg, or Type2_Type1.jpg (each pair exists in one order only, e.g. Flying_Psychic).
+        // Single type: img/area/Type.jpg. Nothing found: the old img/background/Type1.jpg.
+        var areaBgCache = {};
+        function findAreaImage(names) {
+            var key = names.join("|");
+            if (!areaBgCache[key]) areaBgCache[key] = new Promise(function(resolve) {
+                (function tryNext(i) {
+                    if (i >= names.length) return resolve(null);
+                    var url = "img/area/" + names[i] + ".jpg", img = new Image();
+                    img.onload = function() { resolve(url); };
+                    img.onerror = function() { tryNext(i + 1); };
+                    img.src = url;
+                })(0);
+            });
+            return areaBgCache[key];
+        }
+        function setCardBackground(p, type1, type2) {
+            var t1 = String(type1 || "").trim(), t2 = String(type2 || "").trim();
+            var names = t2 && t2 !== t1 ? [t1 + "_" + t2, t2 + "_" + t1] : [t1];
+            findAreaImage(names).then(function(url) {
+                if (aPokemonData[curIndex] !== p && aPokemonData[curIndex].ID !== p.ID) return; // another card was opened meanwhile
+                var $c = $(".card_content");
+                // The picture covers the same inner rectangle as the old backgrounds (x 30-780, y 0-1100), so the
+                // card's rounded corners outside the frame stay black
+                if (url) { $c.addClass("area-bg").css("background-image", "none"); $(".card_bg").css("background-image", "url('" + url + "')"); }
+                else $c.removeClass("area-bg").css({ "background-image": "url('img/background/" + t1 + ".jpg')", "background-size": "750px 1100px", "background-position": "30px 0" });
+            });
+        }
+
         // Shrinks the card name when it would run into the area cost icons: starts at 50px, never below 32px (print)
         var NAME_MAX_FONT = 50, NAME_MIN_FONT = 32, NAME_COST_GAP = 14;
         function fitCardName() {
