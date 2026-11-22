@@ -131,13 +131,13 @@ ID,Name,Rarity,Type1,Type2,Ability_R_Name,Ability_R_Effect,Sheet,Points,Cost,Not
 10114,Alolan Exeggutor,A,Grass,Dragon,Towering,+1 for each other Pokémon in this Pokémon's row and column that is 1.5 m or taller.,,6,{2}{GRA}{GRA}{DRG},,,Alola,0103 Exeggutor Alola,10.9,415.6,Grass,Stage 1,102
 104,Cubone,B,Ground,,,,,1,{1}{GRD},,,,,0.4,6.5,Monster,Basic,
 105,Marowak,A,Ground,,Rock Head,+4 to any Rock-type Pokémon placed directly above this Pokémon.,,6,{3}{GRD}{GRD},,,,,1,45,Monster,Stage 1,104
-10115,Alolan Marowak,A,Fire,Ghost,,,,6,{2}{FIR}{FIR}{GHO},,,Alola,0105 Marowak Alola,1,34,Monster,Stage 1,104
+10115,Alolan Marowak,A,Fire,Ghost,Cursed Body,+2 for each adjacent Fire-type or Ghost-type Pokémon.,,6,{2}{FIR}{FIR}{GHO},,,Alola,0105 Marowak Alola,1,34,Monster,Stage 1,104
 106,Hitmonlee,A,Fighting,,Limber,+4 to any Fighting-type Pokémon placed directly below this Pokémon.,,6,{3}{FIG}{FIG},,,,,1.5,49.8,Human-Like,Basic,
 107,Hitmonchan,A,Fighting,,Iron Fist,+4 to any Fighting-type Pokémon placed directly above this Pokémon.,,6,{3}{FIG}{FIG},,,,,1.4,50.2,Human-Like,Basic,
 108,Lickitung,A,Normal,,,,,6,{3}{NOR}{NOR},,,,,1.2,65.5,Monster,Basic,
 109,Koffing,I,Poison,,,,13,3,{2}{POS},,,,,0.6,1,Amorphous,Basic,
 110,Weezing,E,Poison,,Stench,The Pokémon directly to the left and right of this Pokémon lose all their other types and become Poison-type only. This applies after any other type-changing effect.,,9,{4}{POS}{POS}{POS},,,,,1.2,9.5,Amorphous,Stage 1,109
-10167,Galarian Weezing,E,Poison,Fairy,,,,9,{3}{POS}{POS}{FAR}{FAR},,,Galar,0110 Weezing Galar,3,16,Amorphous,Stage 1,109
+10167,Galarian Weezing,E,Poison,Fairy,Neutralizing Gas,"At game end, before scoring, choose 1 Pokémon on an opponent's board. Its ability has no effect.",,9,{3}{POS}{POS}{FAR}{FAR},,,Galar,0110 Weezing Galar,3,16,Amorphous,Stage 1,109
 111,Rhyhorn,I,Ground,Rock,,,,3,{1}{GRD}{ROC},,,,,1,115,Monster / Field,Basic,
 112,Rhydon,E,Ground,Rock,,,,9,{3}{GRD}{GRD}{ROC}{ROC},,,,,1.9,120,Monster / Field,Stage 1,111
 113,Chansey,A,Normal,,,,,6,{3}{NOR}{NOR},,,,,1.1,34.6,Fairy,Basic,
@@ -156,10 +156,10 @@ ID,Name,Rarity,Type1,Type2,Ability_R_Name,Ability_R_Effect,Sheet,Points,Cost,Not
 125,Electabuzz,A,Electric,,,,,6,{3}{ELE}{ELE},,,,,1.1,30,Human-Like,Basic,
 126,Magmar,A,Fire,,,,,6,{3}{FIR}{FIR},,,,,1.3,44.5,Human-Like,Basic,
 127,Pinsir,A,Bug,,Mold Breaker,Also counts as a Fighting-type Pokémon for all ability effects.,15,6,{3}{BUG}{BUG},,,,,1.5,55,Bug,Basic,
-128,Tauros,A,Normal,,Intimidate,"When an opponent explores, you may name 1 market Area; they can't take it this turn.",,6,{3}{NOR}{NOR},,,,,1.4,88.4,Field,Basic,
-10250,Paldean Tauros (Combat),A,Fighting,,,,,6,{3}{FIG}{FIG},,,Paldea,0128 Tauros Paldea Combat,1.4,115,Field,Basic,
-10251,Paldean Tauros (Blaze),A,Fighting,Fire,,,,6,{2}{FIG}{FIG}{FIR},,,Paldea,0128 Tauros Paldea Blaze,1.4,85,Field,Basic,
-10252,Paldean Tauros (Aqua),A,Fighting,Water,,,,6,{2}{FIG}{FIG}{WAT},,,Paldea,0128 Tauros Paldea Aqua,1.4,110,Field,Basic,
+128,Tauros,A,Normal,,Herd Call,"+3 for each other Tauros on your board (any form). When you capture this Pokémon, you may search the Pokémon deck for another Tauros, add it to the market, then shuffle the deck.",,6,{3}{NOR}{NOR},,,,,1.4,88.4,Field,Basic,
+10250,Paldean Tauros (Combat),A,Fighting,,Herd Call,"+3 for each other Tauros on your board (any form). When you capture this Pokémon, you may search the Pokémon deck for another Tauros, add it to the market, then shuffle the deck.",,6,{3}{FIG}{FIG},,,Paldea,0128 Tauros Paldea Combat,1.4,115,Field,Basic,
+10251,Paldean Tauros (Blaze),A,Fighting,Fire,Herd Call,"+3 for each other Tauros on your board (any form). When you capture this Pokémon, you may search the Pokémon deck for another Tauros, add it to the market, then shuffle the deck.",,6,{2}{FIG}{FIG}{FIR},,,Paldea,0128 Tauros Paldea Blaze,1.4,85,Field,Basic,
+10252,Paldean Tauros (Aqua),A,Fighting,Water,Herd Call,"+3 for each other Tauros on your board (any form). When you capture this Pokémon, you may search the Pokémon deck for another Tauros, add it to the market, then shuffle the deck.",,6,{2}{FIG}{FIG}{WAT},,,Paldea,0128 Tauros Paldea Aqua,1.4,110,Field,Basic,
 129,Magikarp,B,Water,,,,,1,{1}{WAT},,,,,0.9,10,Water 2 / Dragon,Basic,
 130,Gyarados,E,Water,Flying,Intimidate,"When an opponent explores, you may name up to 2 market Areas; they can't take them this turn.",,9,{3}{WAT}{WAT}{FLY}{FLY},,,,,6.5,235,Water 2 / Dragon,Stage 1,129
 131,Lapras,E,Water,Ice,Water Absorb,+3 for each Water-type Pokémon adjacent to this Pokémon.,,9,{3}{WAT}{WAT}{ICE}{ICE},,,,,2.5,220,Monster / Water 1,Basic,

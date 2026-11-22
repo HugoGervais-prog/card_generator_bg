@@ -213,7 +213,12 @@ h2 {
 .card_name {
     color: white;
     position: absolute;
-    top: 5px;
+    /* Fixed line box (same place the 50px name always sat) with the text centred in it,
+       so a name shrunk by fitCardName() stays vertically centred in the banner */
+    top: 54px;
+    margin: 0;
+    height: 61px;
+    line-height: 61px;
     left: 70px;
     font-size: 50px;
     width: 650px;

@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-    <link href="css/style_r.css?v=10" rel="stylesheet">
+    <link href="css/style_r.css?v=12" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="css/dashboard.css?v=6" rel="stylesheet">
 
@@ -350,7 +350,7 @@
             $(".portrait_box").css("top", size < 36 ? "100px" : "150px");
         }
         // Re-measure once the card font has loaded and whenever an icon inside the text finishes loading
-        if (document.fonts && document.fonts.ready) document.fonts.ready.then(function() { layoutAbilityBox(); fitEggGroups(); });
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(function() { layoutAbilityBox(); fitEggGroups(); fitCardName(); });
         $(function() { $(".ability_text").each(function() { this.addEventListener("load", layoutAbilityBox, true); }); });
 
         function renderCard(p) {
@@ -465,6 +465,7 @@
                 $(".c2_type").hide();
             }
             renderCost(p.Cost || defaultCost(p.Rarity, type1, type2));
+            fitCardName();
             $(".capture_rate").html(p.Points !== undefined && p.Points !== "" ? p.Points : defaultPoints(rarity));
         }
 
@@ -563,6 +564,23 @@
         }
 
         // Draws "{2}{WAT}{FIR}" left to right, right-aligned in the top-right corner of the card
+        // Shrinks the card name when it would run into the area cost icons: starts at 50px, never below 32px (print)
+        var NAME_MAX_FONT = 50, NAME_MIN_FONT = 32, NAME_COST_GAP = 14;
+        function fitCardName() {
+            var $n = $(".card_name"), n = $n[0], cost = document.querySelector(".cost_row");
+            if (!n) return;
+            $n.css({ "font-size": NAME_MAX_FONT + "px", "white-space": "nowrap" });
+            var right = cost && cost.offsetWidth ? cost.offsetLeft - NAME_COST_GAP : n.offsetLeft + n.offsetWidth;
+            var room = right - n.offsetLeft, size = NAME_MAX_FONT;
+            var width = function() { var r = document.createRange(); r.selectNodeContents(n); return r.getBoundingClientRect().width / cardScale(); };
+            while (width() > room && size > NAME_MIN_FONT) { size--; $n.css("font-size", size + "px"); }
+        }
+        // The card may be shown scaled down on screen; measurements in card pixels divide by this
+        function cardScale() {
+            var card = document.getElementById("capture");
+            return card.getBoundingClientRect().width / card.offsetWidth || 1;
+        }
+
         function renderCost(cost) {
             var codeToFile = {};
             $.each(TYPE_CODES, function(t, c) { codeToFile[c] = t.toLowerCase(); });
