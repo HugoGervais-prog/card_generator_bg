@@ -124,3 +124,46 @@
 .dash-panel h3.dash-subhead { margin: 24px 0 12px; font-size: 13px; font-weight: 700; color: #a0a0b0; text-transform: uppercase; letter-spacing: 0.06em; }
 .dash-tile-total { background-color: #34343f; border: 1px solid #f5d02f; }
 .dash-tile-total .dt-value { color: #f5d02f; }
+
+/* Legendary sheets: holographic foil (they print on special paper) */
+.dash-tile-foil {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: linear-gradient(125deg, #3a2f5c 0%, #1f4a5c 25%, #2f5c3a 45%, #5c5a2f 65%, #5c2f4a 85%, #3a2f5c 100%);
+    background-size: 300% 300%;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.15);
+    animation: foil-hue 8s ease-in-out infinite;
+}
+.dash-tile-foil::before {             /* rainbow sheen */
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: repeating-linear-gradient(115deg,
+        rgba(255, 0, 128, 0.18) 0%, rgba(255, 200, 0, 0.18) 8%, rgba(0, 255, 160, 0.18) 16%,
+        rgba(0, 160, 255, 0.18) 24%, rgba(200, 0, 255, 0.18) 32%, rgba(255, 0, 128, 0.18) 40%);
+    background-size: 250% 250%;
+    mix-blend-mode: color-dodge;
+    animation: foil-sheen 6s linear infinite;
+}
+.dash-tile-foil::after {              /* moving glint */
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    left: -60%;
+    width: 50%;
+    z-index: -1;
+    background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.35) 50%, transparent 100%);
+    transform: skewX(-20deg);
+    animation: foil-glint 4s ease-in-out infinite;
+}
+.dash-tile-foil .dt-label, .dash-tile-foil .dt-foot { color: #e8e4f5; }
+.dash-tile-foil .dt-value { color: #fff; text-shadow: 0 0 8px rgba(255, 255, 255, 0.6); }
+@keyframes foil-hue { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@keyframes foil-sheen { from { background-position: 0% 0%; } to { background-position: 250% 250%; } }
+@keyframes foil-glint { 0% { left: -60%; } 60%, 100% { left: 130%; } }
+@media (prefers-reduced-motion: reduce) {
+    .dash-tile-foil, .dash-tile-foil::before, .dash-tile-foil::after { animation: none; }
+}

@@ -375,8 +375,11 @@
         });
 
         // Print sheets per card type and in total ("…" while that file is still loading)
+        // Legendary cards print on special paper, so they get their own sheets
+        var legendaries = data.filter(function (d) { return String(d.rarity).trim().toUpperCase() === "L"; }).length;
         var sheetRows = [
-            ["Pokémon sheets", n, PER_SHEET.pokemon],
+            ["Pokémon sheets", n - legendaries, PER_SHEET.pokemon],
+            ["Legendary sheets", legendaries, PER_SHEET.pokemon, "special paper", "dash-tile-foil"],
             ["Area sheets", areaRows ? areaRows.length : null, PER_SHEET.area],
             ["Thesis sheets", thesisCount, PER_SHEET.thesis]
         ];
@@ -386,8 +389,8 @@
         sheetRows.forEach(function (r) {
             var known = r[1] != null, sh = known ? r[1] / r[2] : 0;
             if (known) { exact += sh; whole += Math.ceil(sh); } else ready = false;
-            $sheets.append('<div class="dash-tile"><span class="dt-label">' + r[0] + '</span><span class="dt-value">' + (known ? sh.toFixed(1) : "…") +
-                '</span><span class="dt-foot">' + (known ? r[1] + " cards ÷ " + r[2] + " per sheet<br>" + Math.ceil(sh) + " to print" : "loading") + "</span></div>");
+            $sheets.append('<div class="dash-tile' + (r[4] ? " " + r[4] : "") + '"><span class="dt-label">' + r[0] + '</span><span class="dt-value">' + (known ? sh.toFixed(1) : "…") +
+                '</span><span class="dt-foot">' + (known ? r[1] + " cards ÷ " + r[2] + " per sheet<br>" + Math.ceil(sh) + " to print" + (r[3] ? " · " + r[3] : "") : "loading") + "</span></div>");
         });
         $sheets.append('<div class="dash-tile dash-tile-total"><span class="dt-label">Grand total</span><span class="dt-value">' + (ready ? exact.toFixed(1) : "…") +
             '</span><span class="dt-foot">' + (ready ? "all card types<br>" + whole + " to print" : "loading") + "</span></div>");
