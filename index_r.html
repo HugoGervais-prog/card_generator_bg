@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-    <link href="css/style_r.css?v=20" rel="stylesheet">
+    <link href="css/style_r.css?v=21" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="css/dashboard.css?v=6" rel="stylesheet">
 
@@ -80,6 +80,11 @@
 
         <div class="sidebar-section">
             <button id="download-btn"><i class="bi bi-download"></i> Download Image</button>
+
+            <div class="evo-line-panel">
+                <h2><i class="bi bi-diagram-3"></i> Evolution Line</h2>
+                <div class="evo-line"></div>
+            </div>
 
             <details class="edit-panel" open>
                 <summary><h2>Edit Card</h2></summary>
@@ -311,7 +316,7 @@
             $(".edit-panel").on("toggle", fitRosterToCard);
             if (window.ResizeObserver) {
                 var ro = new ResizeObserver(fitRosterToCard);
-                [".card-section", ".edit-panel", "#download-btn"].forEach(function(sel) { var el = document.querySelector(sel); if (el) ro.observe(el); });
+                [".card-section", ".edit-panel", "#download-btn", ".evo-line-panel"].forEach(function(sel) { var el = document.querySelector(sel); if (el) ro.observe(el); });
             }
             fitRosterToCard();
         });
@@ -492,6 +497,7 @@
             renderCost(p.Cost || defaultCost(p.Rarity, type1, type2));
             fitCardName();
             renderEvolutions(p);
+            renderEvolutionLine(p);
             $(".capture_rate").html(p.Points !== undefined && p.Points !== "" ? p.Points : defaultPoints(rarity));
         }
 
@@ -694,6 +700,44 @@
         function evolutionsOf(p) {
             return $.grep(aPokemonData, function(x) { return x.Name && String(x.Evolves_From).trim() === String(p.ID); });
         }
+        // ===== Evolution line box (sidebar, under the download button) =====
+        // The whole line from the CSV Evolves_From links: walk up to the first card, then lay out one column per stage
+        // (branches such as Eevee's stack in the same column). Click a Pokémon to open it on the card.
+        function cardById(id) {
+            return $.grep(aPokemonData, function(x) { return x.Name && String(x.ID) === String(id).trim(); })[0];
+        }
+        function renderEvolutionLine(p) {
+            var $line = $(".evo-line").empty();
+            var root = p, seen = {};
+            while (root.Evolves_From && !seen[root.ID]) {
+                seen[root.ID] = true;
+                var up = cardById(root.Evolves_From);
+                if (!up) break;
+                root = up;
+            }
+            var columns = [], level = [root], guard = 0;
+            while (level.length && guard++ < 5) {
+                columns.push(level);
+                level = [].concat.apply([], level.map(evolutionsOf));
+            }
+            if (columns.length === 1) {
+                $line.append($("<p>", { "class": "evo-line-empty", text: p.Name + " doesn't evolve." }));
+                return;
+            }
+            columns.forEach(function(col, i) {
+                if (i) $line.append('<i class="bi bi-chevron-right evo-line-arrow"></i>');
+                var $col = $("<div>", { "class": "evo-line-col" + (col.length > 3 ? " wide" : "") }).appendTo($line);
+                col.forEach(function(e) {
+                    $("<button>", { type: "button", "class": "evo-node" + (String(e.ID) === String(p.ID) ? " active" : ""), title: e.Name })
+                        .append($("<span>", { "class": "evo-node-sprite gen" + pokemonGeneration(e) })
+                            .append($("<img>", { src: spritePath(e), alt: e.Name })))
+                        .append($("<span>", { "class": "evo-node-name", text: e.Name }))
+                        .on("click", function() { openPokemonAt(indexOfId(e.ID)); })
+                        .appendTo($col);
+                });
+            });
+        }
+
         // Layout (a grid): right column = dark box with "EVOLVE" above the bubble(s); left column = a cost bar per evolution.
         // One evolution: its cost bar sits at the top, level with the label. Several: each bar sits beside its bubble.
         function renderEvolutions(p) {
@@ -1150,8 +1194,8 @@
         }
 
         // ===== Evolution stage, TCG terms: Basic / Stage 1 / Stage 2 =====
-        // Counts the species this one evolves from, skipping baby Pokémon as the TCG does
-        // (Pichu -> Pikachu: Pikachu is Basic; Raichu is Stage 1; Mime Jr. -> Mr. Mime: Mr. Mime is Basic).
+        // Counts the species this one evolves from. Baby Pokémon count as a stage in this game
+        // (Pichu -> Pikachu -> Raichu: Pikachu is Stage 1, Raichu is Stage 2).
         var speciesCache = {};
         function getSpecies(url) {
             if (!speciesCache[url]) speciesCache[url] = fetch(url).then(function(r) {
@@ -1164,10 +1208,8 @@
             var count = 0, from = null, prev = species.evolves_from_species;
             while (prev) {
                 var s = await getSpecies(prev.url);
-                if (!s.is_baby) {
-                    count++;
-                    if (!from) from = { id: parseInt(prev.url.split("/").filter(Boolean).pop(), 10), name: s.name };
-                }
+                count++;
+                if (!from) from = { id: parseInt(prev.url.split("/").filter(Boolean).pop(), 10), name: s.name };
                 prev = s.evolves_from_species;
             }
             return { stage: Math.min(count, 2), from: from };
