@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-    <link href="css/style_r.css?v=17" rel="stylesheet">
+    <link href="css/style_r.css?v=20" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="css/dashboard.css?v=6" rel="stylesheet">
 
@@ -43,6 +43,9 @@
                 <p class="card_name">Bulbasaur</p>
 
                 <!-- Stage (Basic / Stage 1 / Stage 2) and the Pokémon it evolves from, like the TCG; filled from PokéAPI -->
+                <!-- Evolutions (top right): each one's bubble and the cost to evolve into it -->
+                <div class="evolve_box" hidden></div>
+
                 <div class="stage_box" hidden>
                     <span class="stage_label">BASIC</span>
                     <div class="evo_bubble"><img class="evo_sprite" alt=""></div>
@@ -102,6 +105,8 @@
                     <label>Points<input id="edit-points" type="number" min="0" step="1"></label>
                     <label><span class="label-row">Area cost <span class="ref-tip align-right" tabindex="0" aria-label="Symbol reference">?<span class="ref-tip-box"></span></span></span><input id="edit-cost" placeholder="{2}{WAT}"></label>
                     <span class="field-hint full">Changing Rarity or a type resets Points and Area cost to that rarity's defaults.</span>
+                    <label>Evolve discount<input id="edit-evolve-discount" type="number" min="0" step="1" placeholder="0"></label>
+                    <span class="field-hint evolve-hint">Generic pips removed from the cost of evolving this Pokémon (the evolution's full cost by default). <span id="evolve-hint-list"></span></span>
                     <label class="full">Ability name<input id="edit-ability-name"></label>
                     <label class="full"><span class="label-row">Ability effect <span class="ref-tip" tabindex="0" aria-label="Symbol reference">?<span class="ref-tip-box"></span></span></span>
                         <textarea id="edit-ability-effect" rows="4"></textarea>
@@ -486,6 +491,7 @@
             }
             renderCost(p.Cost || defaultCost(p.Rarity, type1, type2));
             fitCardName();
+            renderEvolutions(p);
             $(".capture_rate").html(p.Points !== undefined && p.Points !== "" ? p.Points : defaultPoints(rarity));
         }
 
@@ -496,7 +502,8 @@
             "Name": "#edit-name", "Rarity": "#edit-rarity", "Type1": "#edit-type1", "Type2": "#edit-type2",
             "Ability_R_Name": "#edit-ability-name", "Ability_R_Effect": "#edit-ability-effect",
             "Points": "#edit-points", "Cost": "#edit-cost",
-            "Art_Zoom": "#edit-art-zoom", "Art_X": "#edit-art-x", "Art_Y": "#edit-art-y"
+            "Art_Zoom": "#edit-art-zoom", "Art_X": "#edit-art-x", "Art_Y": "#edit-art-y",
+            "Evolve_Discount": "#edit-evolve-discount"
         };
         // Custom art framing (CSV columns Art_Zoom, Art_X, Art_Y in %); an empty cell means the default
         var ART_DEFAULTS = { "Art_Zoom": 100, "Art_X": 50, "Art_Y": 50 };
@@ -663,6 +670,49 @@
             return card.getBoundingClientRect().width / card.offsetWidth || 1;
         }
 
+        // ===== Evolve: the cards that evolve from this one (CSV Evolves_From) and the cost to evolve =====
+        // Cost to evolve = the evolution's full cost, minus this card's Evolve_Discount in generic pips
+        // (type pips are always paid). Each evolution gets its own bubble.
+        function cardCost(c) { return c.Cost || defaultCost(c.Rarity, c.Type1, c.Type2); }
+        function discountCost(cost, discount) {
+            discount = parseInt(discount, 10) || 0;
+            if (discount <= 0) return cost;
+            return String(cost).replace(/\{(\d+)\}/, function(m, n) { var left = parseInt(n, 10) - discount; return left > 0 ? "{" + left + "}" : ""; });
+        }
+        // Cost symbols as icons (same look as the area cost row)
+        function costIcons(cost) {
+            var codeToFile = {}, out = [];
+            $.each(TYPE_CODES, function(t, c) { codeToFile[c] = t.toLowerCase(); });
+            (String(cost).match(/\{[^}]*\}/g) || []).forEach(function(tok) {
+                var code = tok.slice(1, -1).trim().toUpperCase();
+                out.push(codeToFile[code]
+                    ? $("<img>", { "class": "evolve_type", src: "img/type/" + codeToFile[code] + ".png" })
+                    : $("<span>", { "class": "evolve_generic", text: code }));
+            });
+            return out;
+        }
+        function evolutionsOf(p) {
+            return $.grep(aPokemonData, function(x) { return x.Name && String(x.Evolves_From).trim() === String(p.ID); });
+        }
+        // Layout (a grid): right column = dark box with "EVOLVE" above the bubble(s); left column = a cost bar per evolution.
+        // One evolution: its cost bar sits at the top, level with the label. Several: each bar sits beside its bubble.
+        function renderEvolutions(p) {
+            var evos = evolutionsOf(p), $box = $(".evolve_box").empty();
+            $box.prop("hidden", !evos.length).toggleClass("single", evos.length === 1).toggleClass("many", evos.length > 2);
+            if (!evos.length) { $("#evolve-hint-list").text("This Pokémon doesn't evolve."); return; }
+            $box.css("grid-template-rows", "auto" + new Array(evos.length + 1).join(" auto"));
+            $("<div>", { "class": "evolve_panel" }).css("grid-row", "1 / " + (evos.length + 2)).appendTo($box);
+            $("<span>", { "class": "evolve_label", text: "EVOLVE" }).appendTo($box);
+            evos.forEach(function(e, i) {
+                var row = i + 2;
+                $("<div>", { "class": "evolve_bubble", title: e.Name }).css("grid-row", String(row))
+                    .append($("<img>", { src: spritePath(e), alt: e.Name })).appendTo($box);
+                $("<div>", { "class": "evolve_cost", title: e.Name }).css("grid-row", evos.length === 1 ? "1 / 3" : String(row))
+                    .append(costIcons(discountCost(cardCost(e), p.Evolve_Discount))).appendTo($box);
+            });
+            $("#evolve-hint-list").text(evos.length ? "Evolves into " + evos.map(function(e) { return e.Name; }).join(", ") + "." : "This Pokémon doesn't evolve.");
+        }
+
         function renderCost(cost) {
             var codeToFile = {};
             $.each(TYPE_CODES, function(t, c) { codeToFile[c] = t.toLowerCase(); });
@@ -738,6 +788,7 @@
             // framing only matters with custom art; defaults are stored as empty cells
             var hasArt = String(p.Custom_Art || "").trim() !== "";
             $.each(ART_DEFAULTS, function(col, def) { if (!hasArt || Number(p[col]) === def) p[col] = ""; });
+            if (!(parseInt(p.Evolve_Discount, 10) > 0)) p.Evolve_Discount = "";
             return p;
         }
 

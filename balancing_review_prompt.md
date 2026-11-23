@@ -3,7 +3,14 @@ You are helping me balance a Pokémon card game. I'll attach `data_r.csv`, the c
 ## The CSV
 
 Columns, in order:
-`ID,Name,Rarity,Type1,Type2,Ability_R_Name,Ability_R_Effect,Sheet,Points,Cost,Note,Note_Priority`
+`ID,Name,Rarity,Type1,Type2,Ability_R_Name,Ability_R_Effect,Sheet,Points,Cost,Note,Note_Priority,Form,Sprite,Height_m,Weight_kg,Egg_Groups,Stage,Evolves_From,Custom_Art,Art_Zoom,Art_X,Art_Y,Evolve_Discount`
+
+The columns after Note_Priority are card data you can read but should not change, except Evolve_Discount if a note calls for it:
+- **Form / Sprite**: regional form (Alola, Galar, Hisui, Paldea) and its sprite file. Form rows use the PokéAPI number as ID.
+- **Height_m / Weight_kg / Egg_Groups**: size and egg groups, used by some abilities.
+- **Stage / Evolves_From**: Basic, Stage 1 or Stage 2, and the ID of the card it evolves from.
+- **Custom_Art / Art_Zoom / Art_X / Art_Y**: optional full-art picture and its framing. Ignore them.
+- **Evolve_Discount**: generic pips removed from the cost of evolving this Pokémon (empty = 0). See "Evolve" below.
 
 - **ID**: Pokédex number. Rows with an empty Name are placeholders; ignore them and leave them untouched.
 - **Rarity**: B (Beginner), I (Intermediate), A (Advanced), E (Expert), M (Mythic), L (Legendary).
@@ -33,6 +40,13 @@ Every card starts from its rarity's default. Points or Cost that differ from the
 ## Game rules
 
 [PASTE YOUR GAME RULES HERE: board layout, how capturing and area cost work, how scoring works, what "row", "column" and "adjacent" mean.]
+
+### Evolve (action)
+
+- On your turn, you may take the **Evolve** action on a Pokémon on your board that has an evolution (its card shows an EVOLVE box in the top right, with one bubble per possible evolution).
+- Pay the evolution's cost shown next to its bubble: that is the evolution's full area cost, minus the evolving Pokémon's Evolve_Discount in generic pips (type pips are always paid).
+- Search the Pokémon deck for that evolution and place it on top of the evolving Pokémon, in the same space. Then shuffle the deck. If the evolution isn't in the deck, you can't take the action.
+- When balancing, judge evolution lines as a whole: evolving skips capturing the evolution from the market, so a line whose evolution is very strong for its cost, or an Evolve_Discount that makes evolving almost free, is worth a note.
 
 If the rules above are missing or unclear, ask me before judging abilities. Don't guess the rules.
 
